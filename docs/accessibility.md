@@ -38,6 +38,8 @@ A collection of resources that will introduce you to the concept of accessibilit
 * [The Six Simplest Accessibility Tests Anyone Can Do](http://www.karlgroves.com/2013/09/05/the-6-simplest-web-accessibility-tests-anyone-can-do/): A handful of simple things you can do to think about and implement accessibility with little effort as you work on projects.
 * [Why Keyboard Accessibility Isn’t the Same Thing as Screen Reader Accessibility](https://www.ssbbartgroup.com/blog/why-keyboard-accessibility-isnt-the-same-thing-as-screen-reader-accessibility/): This blog post explains the three critical aspects of accessibility for interactive web technologies: Keyboard Accessibility, Screen Reader Accessibility and Cognitive Accessibility, and the differences between each.
 * [Teaching Accessibility Core Rules](http://www.deque.com/pragmatica11y-teaching-accessibility-core-rules): This post breaks down accessibility principles to their core, making them even easier to think about during projects.
+* Presentation: [Explorations in the Virtual DOM: How React.js Impacts Accessibility](https://marcysutton.github.io/react-a11y-presentation/)
+* [Inclusive Design Fundamentals](https://isner.github.io/inclusive-design-fundamentals/), especially the [disability types](https://isner.github.io/inclusive-design-fundamentals/handouts/disability-types.html) to learn about how different disabilities affect how people use technology.
 
 ### Going in depth
 
