@@ -114,7 +114,7 @@ export function serverRender( req, res ) {
 	}
 
 	if ( ! isDefaultLocale( context.lang ) ) {
-		context.i18nLocaleScript = '//widgets.wp.com/languages/calypso/' + context.lang + '.js';
+		context.i18nLocaleScript = '//widgets.wp.com/languages/calypso/' + context.lang + '.utf8.js';
 	}
 
 	if (
