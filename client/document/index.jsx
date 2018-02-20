@@ -14,6 +14,7 @@ import { get } from 'lodash';
 import { default as appConfig } from 'config';
 import { jsonStringifyForHtml } from '../../server/sanitize';
 import Head from '../components/head';
+import EnvironmentBadge from '../components/environment-badge';
 import getStylesheet from './utils/stylesheet';
 
 class Document extends React.Component {
@@ -123,30 +124,16 @@ class Document extends React.Component {
 						</div>
 					) }
 					{ badge && (
-						<div className="environment-badge">
-							{ preferencesHelper && <div className="environment is-prefs" /> }
-							{ abTestHelper && <div className="environment is-tests" /> }
-							{ branchName &&
-								branchName !== 'master' && (
-									<span className="environment branch-name" title={ 'Commit ' + commitChecksum }>
-										{ branchName }
-									</span>
-								) }
-							{ devDocs && (
-								<span className="environment is-docs">
-									<a href={ devDocsURL } title="DevDocs">
-										docs
-									</a>
-								</span>
-							) }
-							<span className={ `environment is-${ badge } is-env` }>{ badge }</span>
-							<a
-								className="bug-report"
-								href={ feedbackURL }
-								title="Report an issue"
-								target="_blank"
-							/>
-						</div>
+						<EnvironmentBadge
+							abTestHelper={ abTestHelper }
+							branchName={ branchName }
+							commitChecksum={ commitChecksum }
+							devDocs={ devDocs }
+							devDocsURL={ devDocsURL }
+							badge={ badge }
+							feedbackURL={ feedbackURL }
+							preferencesHelper={ preferencesHelper }
+						/>
 					) }
 
 					<script
