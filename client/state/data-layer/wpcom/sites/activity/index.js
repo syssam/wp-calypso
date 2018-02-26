@@ -83,7 +83,10 @@ export const togglePolling = ( { dispatch, getState }, { isWatching, siteId } ) 
  * @param {object} action incoming action
  */
 export const continuePolling = ( { dispatch, getState }, action ) => {
-	if ( ! get( action, 'meta.dataLayer.isWatching' ) ) {
+	// ignore any updates which weren't triggered by the polling system
+	// and don't let page X of Y updates reset our polling state;
+	// they are continuations of previous activity here
+	if ( ! get( action, 'meta.dataLayer.isWatching' ) || get( action, 'params.page', 1 ) > 1 ) {
 		return;
 	}
 
@@ -170,6 +173,7 @@ export const handleActivityLogRequest = action => {
 					group: params.group,
 					name: params.name,
 					number: params.number,
+					page: params.page,
 					search_after: JSON.stringify( params.searchAfter ),
 				},
 				a => a === undefined
@@ -180,13 +184,22 @@ export const handleActivityLogRequest = action => {
 };
 
 export const receiveActivityLog = ( action, data ) => {
-	return activityLogUpdate(
+	const stateUpdate = activityLogUpdate(
 		action.siteId,
 		data.items,
 		data.totalItems,
 		data.oldestItemTs,
 		action.params
 	);
+
+	if ( ! data.hasOwnProperty( 'nextPage' ) ) {
+		return stateUpdate;
+	}
+
+	return [
+		activityLogRequest( action.siteId, merge( {}, action.params, { page: data.nextPage } ) ),
+		stateUpdate,
+	];
 };
 
 export const receiveActivityLogError = () =>
