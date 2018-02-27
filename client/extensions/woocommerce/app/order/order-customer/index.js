@@ -62,6 +62,7 @@ class OrderCustomerInfo extends Component {
 	};
 
 	renderDialogs = () => {
+		const { siteId } = this.props;
 		const { billing, shipping } = this.props.order;
 		return [
 			<CustomerAddressDialog
@@ -70,6 +71,7 @@ class OrderCustomerInfo extends Component {
 				closeDialog={ this.toggleDialog( false ) }
 				isBilling
 				isVisible={ 'billing' === this.state.showDialog }
+				siteId={ siteId }
 				updateAddress={ this.updateAddress( 'billing' ) }
 			/>,
 			<CustomerAddressDialog
@@ -77,6 +79,7 @@ class OrderCustomerInfo extends Component {
 				address={ shipping }
 				closeDialog={ this.toggleDialog( false ) }
 				isVisible={ 'shipping' === this.state.showDialog }
+				siteId={ siteId }
 				updateAddress={ this.updateAddress( 'shipping' ) }
 			/>,
 		];

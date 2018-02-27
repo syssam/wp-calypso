@@ -15,12 +15,10 @@ import { localize } from 'i18n-calypso';
  * Internal dependencies
  */
 import Button from 'components/button';
-import { getCountries } from 'woocommerce/lib/countries';
 import FormCountrySelectFromApi from 'woocommerce/components/form-location-select/countries';
 import FormStateSelectFromApi from 'woocommerce/components/form-location-select/states';
 import FormFieldSet from 'components/forms/form-fieldset';
 import FormLabel from 'components/forms/form-label';
-import FormSelect from 'components/forms/form-select';
 import FormTextInput from 'components/forms/form-text-input';
 
 class AddressView extends Component {
@@ -33,9 +31,20 @@ class AddressView extends Component {
 			country: PropTypes.string.isRequired,
 			postcode: PropTypes.string,
 		} ),
+		countries: PropTypes.arrayOf(
+			PropTypes.shape( {
+				code: PropTypes.string.isRequired,
+				name: PropTypes.string.isRequired,
+				states: PropTypes.arrayOf(
+					PropTypes.shape( {
+						code: PropTypes.string.isRequired,
+						name: PropTypes.string.isRequired,
+					} )
+				),
+			} )
+		),
 		isEditable: PropTypes.bool,
 		onChange: PropTypes.func,
-		showAllLocations: PropTypes.bool,
 	};
 
 	static defaultProps = {
@@ -48,7 +57,6 @@ class AddressView extends Component {
 			postcode: '',
 		},
 		isEditable: false,
-		showAllLocations: false,
 	};
 
 	constructor( props ) {
@@ -74,69 +82,21 @@ class AddressView extends Component {
 		this.props.onChange( { target: { name: 'state', value: '' } } );
 	};
 
-	getCountryData = () => {
-		const { country } = this.props.address;
-		let countryData = find( getCountries(), { code: country || 'US' } );
+	renderEditableCountry = () => {
+		const { address: { country } } = this.props;
 
-		// If we still haven't found any country data, default to US.
-		// This will catch any case where `country` is defined, but not a supported country.
-		if ( ! Boolean( countryData ) ) {
-			countryData = find( getCountries(), { code: 'US' } );
-		}
-		return countryData;
-	};
-
-	renderCountry = () => {
-		const { address: { country }, showAllLocations, translate } = this.props;
-		if ( showAllLocations ) {
-			return (
-				<FormFieldSet className="address-view__country">
-					<FormCountrySelectFromApi value={ country } onChange={ this.onChangeCountry } />
-				</FormFieldSet>
-			);
-		}
 		return (
 			<FormFieldSet className="address-view__country">
-				<FormLabel>{ translate( 'Country' ) }</FormLabel>
-				<FormSelect name="country" onChange={ this.onChangeCountry } value={ country || 'US' }>
-					{ getCountries().map( option => {
-						return (
-							<option key={ option.code } value={ option.code }>
-								{ option.name }
-							</option>
-						);
-					} ) }
-					<option key="XX" value="XX" disabled="disabled">
-						{ translate( 'More countries coming soon' ) }
-					</option>
-				</FormSelect>
+				<FormCountrySelectFromApi value={ country } onChange={ this.onChangeCountry } />
 			</FormFieldSet>
 		);
 	};
 
-	renderState = () => {
-		const { address: { country, state }, onChange, showAllLocations } = this.props;
-		if ( showAllLocations ) {
-			return (
-				<FormFieldSet className="address-view__editable-state">
-					<FormStateSelectFromApi country={ country } value={ state } onChange={ onChange } />
-				</FormFieldSet>
-			);
-		}
-
-		const { states, statesLabel } = this.getCountryData();
+	renderEditableState = () => {
+		const { address: { country, state }, onChange } = this.props;
 		return (
 			<FormFieldSet className="address-view__editable-state">
-				<FormLabel>{ statesLabel }</FormLabel>
-				<FormSelect name="state" onChange={ onChange } value={ state }>
-					{ states.map( option => {
-						return (
-							<option key={ option.code } value={ option.code }>
-								{ option.name }
-							</option>
-						);
-					} ) }
-				</FormSelect>
+				<FormStateSelectFromApi country={ country } value={ state } onChange={ onChange } />
 			</FormFieldSet>
 		);
 	};
@@ -146,7 +106,7 @@ class AddressView extends Component {
 		this.setState( { showAddressLine2: true } );
 	};
 
-	renderAddressLine2 = () => {
+	renderEditableAddressLine2 = () => {
 		const { address, onChange, translate } = this.props;
 		const { street2 } = address;
 		const { showAddressLine2 } = this.state;
@@ -181,19 +141,19 @@ class AddressView extends Component {
 					<FormLabel>{ translate( 'Street address' ) }</FormLabel>
 					<FormTextInput name="street" onChange={ onChange } value={ street } />
 				</FormFieldSet>
-				{ this.renderAddressLine2() }
+				{ this.renderEditableAddressLine2() }
 				<div className="address-view__editable-city-state-postcode">
 					<FormFieldSet>
 						<FormLabel>{ translate( 'City' ) }</FormLabel>
 						<FormTextInput name="city" onChange={ onChange } value={ city } />
 					</FormFieldSet>
-					{ this.renderState() }
+					{ this.renderEditableState() }
 					<FormFieldSet>
 						<FormLabel>{ translate( 'Postal code' ) }</FormLabel>
 						<FormTextInput name="postcode" onChange={ onChange } value={ postcode } />
 					</FormFieldSet>
 				</div>
-				{ this.renderCountry() }
+				{ this.renderEditableCountry() }
 			</div>
 		);
 	};
@@ -228,15 +188,16 @@ class AddressView extends Component {
 			return null;
 		}
 
-		const { name, country } = this.props.address;
-		const countryData = find( getCountries(), { code: country } );
+		const { address, countries } = this.props;
+		const { name, country } = address;
+		const countryName = find( countries, { country } ) || '';
 
 		return (
 			<div className="address-view__fields-static">
 				{ name && <p className="address-view__address-name">{ name }</p> }
 				{ this.renderStreetAddress( this.props.address ) }
 				{ this.renderCityAddress( this.props.address ) }
-				{ country && <p>{ countryData ? countryData.name : country }</p> }
+				{ countryName && <p>{ countryName }</p> }
 			</div>
 		);
 	};
