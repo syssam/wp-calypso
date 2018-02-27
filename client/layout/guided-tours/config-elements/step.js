@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { defer, get, isFunction } from 'lodash';
 import debugFactory from 'debug';
+import { translate } from 'i18n-calypso';
 
 /**
  * Internal dependencies
@@ -60,6 +61,7 @@ export default class Step extends Component {
 		style: PropTypes.object,
 		canSkip: PropTypes.bool,
 		wait: PropTypes.func,
+		children: PropTypes.func.isRequired,
 	};
 
 	static defaultProps = {
@@ -281,7 +283,9 @@ export default class Step extends Component {
 	}
 
 	render() {
-		const { when, children } = this.props;
+		// `children` is a render prop where the value is not the usual JSX markup,
+		// but a React component to render, i.e., function or a class.
+		const { when, children: ContentComponent } = this.props;
 		const { isLastStep } = this.context;
 
 		if ( ! this.state.initialized ) {
@@ -321,7 +325,7 @@ export default class Step extends Component {
 
 		return (
 			<Card className={ classNames( ...classes ) } style={ style }>
-				{ children }
+				<ContentComponent translate={ translate } />
 			</Card>
 		);
 	}
