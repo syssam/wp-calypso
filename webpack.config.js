@@ -10,13 +10,11 @@
 const _ = require( 'lodash' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const fs = require( 'fs' );
-const HappyPack = require( 'happypack' );
 const HardSourceWebpackPlugin = require( 'hard-source-webpack-plugin' );
 const path = require( 'path' );
 const webpack = require( 'webpack' );
 const NameAllModulesPlugin = require( 'name-all-modules-plugin' );
 const AssetsPlugin = require( 'assets-webpack-plugin' );
-const UglifyJsPlugin = require( 'uglifyjs-webpack-plugin' );
 const prism = require( 'prismjs' );
 
 /**
@@ -114,7 +112,14 @@ const webpackConfig = {
 			{
 				test: /\.jsx?$/,
 				exclude: /node_modules[\/\\](?!notifications-panel)/,
-				loader: [ 'happypack/loader' ],
+				use: _.compact( [
+					{
+						loader:'thread-loader',
+						options: { workers: 3 }
+					},
+					isDevelopment && 'react-hot-loader',
+					babelLoader,
+				] ),
 			},
 			{
 				test: /node_modules[\/\\](redux-form|react-redux)[\/\\]es/,
@@ -186,13 +191,6 @@ const webpackConfig = {
 		new CopyWebpackPlugin( [
 			{ from: 'node_modules/flag-icon-css/flags/4x3', to: 'images/flags' },
 		] ),
-		new HappyPack( {
-			loaders: _.compact( [
-				isDevelopment && config.isEnabled( 'webpack/hot-loader' ) && 'react-hot-loader',
-				babelLoader,
-			] ),
-		} ),
-		new webpack.NamedModulesPlugin(),
 		new webpack.NamedChunksPlugin( chunk => {
 			if ( chunk.name ) {
 				return chunk.name;
@@ -205,7 +203,6 @@ const webpackConfig = {
 			filename: 'assets.json',
 			path: path.join( __dirname, 'server', 'bundler' ),
 		} ),
-		process.env.NODE_ENV === 'production' && new webpack.optimize.ModuleConcatenationPlugin(),
 	] ),
 	externals: [ 'electron' ],
 };
@@ -214,41 +211,6 @@ if ( calypsoEnv === 'desktop' ) {
 	// no chunks or dll here, just one big file for the desktop app
 	webpackConfig.output.filename = '[name].js';
 } else {
-	// vendor chunk
-	webpackConfig.entry.vendor = [
-		'classnames',
-		'create-react-class',
-		'gridicons',
-		'i18n-calypso',
-		'immutable',
-		'lodash',
-		'moment',
-		'page',
-		'prop-types',
-		'react',
-		'react-dom',
-		'react-redux',
-		'redux',
-		'redux-thunk',
-		'social-logos',
-		'store',
-		'wpcom',
-	];
-
-	// for details on what the manifest is, see: https://webpack.js.org/guides/caching/
-	// tldr: webpack maintains a mapping from chunk ids --> filenames.  whenever a filename changes
-	// then the mapping changes.  By providing a non-existing chunkname to CommonsChunkPlugin,
-	// it extracts the "runtime" so that the frequently changing mapping doesn't break caching of the entry chunks
-	// NOTE: order matters. vendor must be before manifest.
-	webpackConfig.plugins = webpackConfig.plugins.concat( [
-		new webpack.optimize.CommonsChunkPlugin( { name: 'vendor', minChunks: Infinity } ),
-		new webpack.optimize.CommonsChunkPlugin( {
-			async: 'tinymce',
-			minChunks: ( { resource } ) => resource && /node_modules[\/\\]tinymce/.test( resource ),
-		} ),
-		new webpack.optimize.CommonsChunkPlugin( { name: 'manifest' } ),
-	] );
-
 	// jquery is only needed in the build for the desktop app
 	// see electron bug: https://github.com/atom/electron/issues/254
 	webpackConfig.externals.push( 'jquery' );
@@ -290,7 +252,7 @@ if ( config.isEnabled( 'webpack/persistent-caching' ) ) {
 
 if ( shouldMinify ) {
 	webpackConfig.plugins.push(
-		new UglifyJsPlugin( {
+		new webpack.optimize.UglifyJsPlugin( {
 			cache: 'docker' !== process.env.CONTAINER,
 			parallel: true,
 			uglifyOptions: { ecma: 5 },
