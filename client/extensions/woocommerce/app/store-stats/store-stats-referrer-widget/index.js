@@ -51,7 +51,7 @@ class StoreStatsReferrerWidget extends Component {
 								<HorizontalBar
 									extent={ extent }
 									data={ d.sales }
-									currency={ data.currency }
+									currency={ d.currency }
 									height={ 20 }
 								/>
 							</TableItem>
