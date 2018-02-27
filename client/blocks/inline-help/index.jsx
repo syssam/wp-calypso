@@ -24,6 +24,7 @@ import InlineHelpSearchCard from './inline-help-search-card';
 import HelpContact from 'me/help/help-contact';
 import { getInlineHelpSearchResultsForQuery, getSearchQuery } from 'state/inline-help/selectors';
 import { getSelectedSite } from 'state/ui/selectors';
+import isHappychatOpen from 'state/happychat/selectors/is-happychat-open';
 
 /**
  * Module variables
@@ -55,6 +56,9 @@ class InlineHelp extends Component {
 	componentDidUpdate( prevProps, prevState ) {
 		if ( prevState.showContactForm && prevProps.searchQuery !== this.props.searchQuery ) {
 			this.toggleContactForm();
+		}
+		if ( ! prevProps.isHappychatOpen && this.props.isHappychatOpen ) {
+			this.closeInlineHelp();
 		}
 	}
 
@@ -169,6 +173,7 @@ const mapStateToProps = ( state, ownProps ) => ( {
 	searchQuery: getSearchQuery( state ),
 	searchResults: getInlineHelpSearchResultsForQuery( state, ownProps.searchQuery ),
 	selectedSite: getSelectedSite( state ),
+	isHappychatOpen: isHappychatOpen( state ),
 } );
 const mapDispatchToProps = {
 	recordTracksEvent,
