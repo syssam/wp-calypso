@@ -4,10 +4,9 @@
  * External dependencies
  */
 import React, { Fragment } from 'react';
-import { connect } from 'react-redux';
 import { localize } from 'i18n-calypso';
 import page from 'page';
-import { get, map, omit, some } from 'lodash';
+import { get, map, omit, reduce, some } from 'lodash';
 /**
  * Internal dependencies
  */
@@ -21,7 +20,6 @@ import FormTextInput from 'components/forms/form-text-input';
 import FormInputValidation from 'components/forms/form-input-validation';
 import PageViewTracker from 'lib/analytics/page-view-tracker';
 import { JETPACK_ONBOARDING_STEPS as STEPS } from '../constants';
-import { saveJetpackOnboardingSettings } from 'state/jetpack-onboarding/actions';
 
 class JetpackOnboardingBusinessAddressStep extends React.PureComponent {
 	static emptyState = {
@@ -30,6 +28,7 @@ class JetpackOnboardingBusinessAddressStep extends React.PureComponent {
 		state: '',
 		street: '',
 		zip: '',
+		country: '',
 	};
 
 	state = get( this.props.settings, 'businessAddress' ) || this.constructor.emptyState;
@@ -50,11 +49,12 @@ class JetpackOnboardingBusinessAddressStep extends React.PureComponent {
 		const { translate } = this.props;
 
 		return {
-			name: translate( 'Business Name' ),
-			street: translate( 'Street Address' ),
+			name: translate( 'Business name' ),
+			street: translate( 'Street address' ),
 			city: translate( 'City' ),
-			state: translate( 'State' ),
-			zip: translate( 'ZIP Code' ),
+			state: translate( 'State / Region / Province' ),
+			zip: translate( 'ZIP code' ),
+			country: translate( 'Country' ),
 		};
 	}
 
@@ -64,11 +64,22 @@ class JetpackOnboardingBusinessAddressStep extends React.PureComponent {
 			return;
 		}
 
-		const { siteId } = this.props;
+		const { settings, siteId } = this.props;
 
-		this.props.recordJpoEvent( 'calypso_jpo_business_address_submitted' );
+		this.props.recordJpoEvent(
+			'calypso_jpo_business_address_submitted',
+			reduce(
+				this.fields,
+				( eventProps, value, field ) => {
+					const changed = get( settings, [ 'businessAddress', field ] ) !== this.state[ field ];
+					eventProps[ `${ field }_changed` ] = changed;
+					return eventProps;
+				},
+				{}
+			)
+		);
 
-		this.props.saveJetpackOnboardingSettings( siteId, { businessAddress: this.state } );
+		this.props.saveJpoSettings( siteId, { businessAddress: this.state } );
 
 		page( this.props.getForwardUrl() );
 	};
@@ -145,6 +156,4 @@ class JetpackOnboardingBusinessAddressStep extends React.PureComponent {
 	}
 }
 
-export default connect( null, { saveJetpackOnboardingSettings } )(
-	localize( JetpackOnboardingBusinessAddressStep )
-);
+export default localize( JetpackOnboardingBusinessAddressStep );

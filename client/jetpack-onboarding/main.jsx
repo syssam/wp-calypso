@@ -26,7 +26,10 @@ import {
 	getUnconnectedSiteUserHash,
 	getUnconnectedSiteIdBySlug,
 } from 'state/selectors';
-import { requestJetpackOnboardingSettings } from 'state/jetpack-onboarding/actions';
+import {
+	requestJetpackOnboardingSettings,
+	saveJetpackOnboardingSettings,
+} from 'state/jetpack-onboarding/actions';
 
 class JetpackOnboardingMain extends React.PureComponent {
 	static propTypes = {
@@ -67,8 +70,10 @@ class JetpackOnboardingMain extends React.PureComponent {
 
 	render() {
 		const {
+			action,
 			isRequestingSettings,
 			recordJpoEvent,
+			saveJpoSettings,
 			settings,
 			siteId,
 			siteSlug,
@@ -80,6 +85,7 @@ class JetpackOnboardingMain extends React.PureComponent {
 				<QueryJetpackOnboardingSettings siteId={ siteId } />
 				{ siteId ? (
 					<Wizard
+						action={ action }
 						basePath="/jetpack/start"
 						baseSuffix={ siteSlug }
 						components={ COMPONENTS }
@@ -88,6 +94,7 @@ class JetpackOnboardingMain extends React.PureComponent {
 						onBackClick={ this.getNavigationLinkClickHandler( 'back' ) }
 						onForwardClick={ this.getNavigationLinkClickHandler( 'forward' ) }
 						recordJpoEvent={ recordJpoEvent }
+						saveJpoSettings={ saveJpoSettings }
 						siteId={ siteId }
 						siteSlug={ siteSlug }
 						settings={ settings }
@@ -118,6 +125,7 @@ export default connect(
 			STEPS.CONTACT_FORM,
 			isBusiness && STEPS.BUSINESS_ADDRESS,
 			isBusiness && STEPS.WOOCOMMERCE,
+			STEPS.STATS,
 			STEPS.SUMMARY,
 		] );
 		return {
@@ -129,10 +137,13 @@ export default connect(
 			userIdHashed,
 		};
 	},
-	{ recordTracksEvent },
+	{ recordTracksEvent, saveJetpackOnboardingSettings },
 	(
 		{ siteId, userIdHashed, ...stateProps },
-		{ recordTracksEvent: recordTracksEventAction },
+		{
+			recordTracksEvent: recordTracksEventAction,
+			saveJetpackOnboardingSettings: saveJetpackOnboardingSettingsAction,
+		},
 		ownProps
 	) => ( {
 		siteId,
@@ -145,6 +156,7 @@ export default connect(
 				id: siteId + '_' + userIdHashed,
 				...additionalProperties,
 			} ),
+		saveJpoSettings: saveJetpackOnboardingSettingsAction,
 		...ownProps,
 	} )
 )( JetpackOnboardingMain );
