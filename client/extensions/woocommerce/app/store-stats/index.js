@@ -62,7 +62,8 @@ class StoreStats extends Component {
 			limit: 10,
 		};
 		const topWidgets = [ topProducts, topCategories, topCoupons ];
-		const widgetPath = `/${ unit }/${ slug }${ querystring ? '?' : '' }${ querystring || '' }`;
+		const slugAndQuery = `/${ slug }${ querystring ? '?' : '' }${ querystring || '' }`;
+		const widgetPath = `/${ unit }${ slugAndQuery }`;
 
 		return (
 			<Main className="store-stats woocommerce" wideLayout={ true }>
@@ -114,7 +115,10 @@ class StoreStats extends Component {
 							query={ query }
 							statType="statsStoreReferrers"
 							header={
-								<SectionHeader href={ '/store/stats/orders/day/' } label={ 'Store Referrers' } />
+								<SectionHeader
+									href={ `/store/stats/referrers${ widgetPath }` }
+									label={ 'Store Referrers' }
+								/>
 							}
 						>
 							<StoreStatsReferrerWidget
@@ -122,6 +126,7 @@ class StoreStats extends Component {
 								query={ query }
 								statType="statsStoreReferrers"
 								selectedDate={ unitSelectedDate }
+								slugAndQuery={ slugAndQuery }
 							/>
 						</Module>
 					</div>

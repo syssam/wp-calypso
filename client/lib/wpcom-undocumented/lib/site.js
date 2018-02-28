@@ -329,6 +329,7 @@ UndocumentedSite.prototype.statsOrders = function( query ) {
 UndocumentedSite.prototype.statsStoreReferrers = function( query ) {
 	return this.wpcom.req.get(
 		{
+			// path: `/sites/131289914/stats/events-by-referrer`,
 			path: `/sites/${ this._id }/stats/events-by-referrer`,
 			apiNamespace: 'wpcom/v2',
 		},
