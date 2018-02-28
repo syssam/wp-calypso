@@ -34,13 +34,12 @@ import FormButton from 'components/forms/form-button';
 import FormButtonsBar from 'components/forms/form-buttons-bar';
 import FormSectionHeading from 'components/forms/form-section-heading';
 import FormRadio from 'components/forms/form-radio';
-import { recordTracksEvent } from 'state/analytics/actions';
+import { recordGoogleEvent, recordTracksEvent } from 'state/analytics/actions';
 import ReauthRequired from 'me/reauth-required';
 import twoStepAuthorization from 'lib/two-step-authorization';
 import Notice from 'components/notice';
 import NoticeAction from 'components/notice/notice-action';
 import observe from 'lib/mixins/data-observe';
-import eventRecorder from 'me/event-recorder';
 import Main from 'components/main';
 import SitesDropdown from 'components/sites-dropdown';
 import ColorSchemePicker from 'blocks/color-scheme-picker';
@@ -61,7 +60,7 @@ const Account = createReactClass( {
 	displayName: 'Account',
 
 	// form-base mixin is needed for getDisabledState() (and possibly other uses?)
-	mixins: [ formBase, observe( 'userSettings', 'username' ), eventRecorder ],
+	mixins: [ formBase, observe( 'userSettings', 'username' ) ],
 
 	propTypes: {
 		userSettings: PropTypes.object.isRequired,
@@ -163,7 +162,7 @@ const Account = createReactClass( {
 							disabled={ this.getDisabledState() }
 							id="enable_translator"
 							name="enable_translator"
-							onClick={ this.recordCheckboxEvent( 'Community Translator' ) }
+							onClick={ this.getCheckboxHandler( 'Community Translator' ) }
 						/>
 						<span>
 							{ translate( 'Enable the in-page translator where available. {{a}}Learn more{{/a}}', {
@@ -173,7 +172,7 @@ const Account = createReactClass( {
 											target="_blank"
 											rel="noopener noreferrer"
 											href="https://en.support.wordpress.com/community-translator/"
-											onClick={ this.recordClickEvent( 'Community Translator Learn More Link' ) }
+											onClick={ this.getClickHandler( 'Community Translator Learn More Link' ) }
 										/>
 									),
 								},
@@ -257,6 +256,40 @@ const Account = createReactClass( {
 		this.setState( { usernameAction: null } );
 	},
 
+	recordClickEvent( action ) {
+		this.props.recordGoogleEvent( 'Me', 'Clicked on ' + action );
+	},
+
+	getClickHandler( action, callback ) {
+		return () => {
+			this.recordClickEvent( action );
+
+			if ( callback ) {
+				callback();
+			}
+		};
+	},
+
+	getFocusHandler( action ) {
+		return () => this.props.recordGoogleEvent( 'Me', 'Focused on ' + action );
+	},
+
+	getCheckboxHandler( checkboxName ) {
+		return event => {
+			const action = 'Clicked ' + checkboxName + ' checkbox';
+			const value = event.target.checked ? 1 : 0;
+
+			this.props.recordGoogleEvent( 'Me', action, 'checked', value );
+		};
+	},
+
+	getRadioHandler( radioName ) {
+		return event => {
+			const action = 'Clicked ' + radioName + ' radio';
+			this.props.recordGoogleEvent( 'Me', action, 'checked', event.target.value );
+		};
+	},
+
 	cancelUsernameChange() {
 		this.setState( {
 			userLoginConfirm: null,
@@ -325,7 +358,7 @@ const Account = createReactClass( {
 						disabled={ this.getDisabledState() }
 						id="holidaysnow"
 						name="holidaysnow"
-						onClick={ this.recordCheckboxEvent( 'Holiday Snow' ) }
+						onClick={ this.getCheckboxHandler( 'Holiday Snow' ) }
 					/>
 					<span>{ translate( 'Show snowfall on WordPress.com sites.' ) }</span>
 				</FormLabel>
@@ -431,7 +464,7 @@ const Account = createReactClass( {
 				<a
 					className="button"
 					href={ config( 'signup_url' ) }
-					onClick={ this.recordClickEvent( 'Primary Site Add New WordPress Button' ) }
+					onClick={ this.getClickHandler( 'Primary Site Add New WordPress Button' ) }
 				>
 					{ translate( 'Add New Site' ) }
 				</a>
@@ -495,7 +528,7 @@ const Account = createReactClass( {
 						id="user_email"
 						name="user_email"
 						isError={ !! this.state.emailValidationError }
-						onFocus={ this.recordFocusEvent( 'Email Address Field' ) }
+						onFocus={ this.getFocusHandler( 'Email Address Field' ) }
 						value={ this.getEmailAddress() || '' }
 						onChange={ this.updateEmailAddress }
 					/>
@@ -518,7 +551,7 @@ const Account = createReactClass( {
 						id="user_URL"
 						name="user_URL"
 						type="url"
-						onFocus={ this.recordFocusEvent( 'Web Address Field' ) }
+						onFocus={ this.getFocusHandler( 'Web Address Field' ) }
 						value={ this.getUserSetting( 'user_URL' ) || '' }
 						onChange={ this.updateUserSettingInput }
 					/>
@@ -532,7 +565,7 @@ const Account = createReactClass( {
 					<LanguagePicker
 						disabled={ this.getDisabledState() }
 						languages={ config( 'languages' ) }
-						onClick={ this.recordClickEvent( 'Interface Language Field' ) }
+						onClick={ this.getClickHandler( 'Interface Language Field' ) }
 						valueKey="langSlug"
 						value={ this.getUserSetting( 'language' ) || '' }
 						onChange={ this.updateLanguage }
@@ -591,7 +624,7 @@ const Account = createReactClass( {
 						<FormRadio
 							name="usernameAction"
 							onChange={ this.handleRadioChange }
-							onClick={ this.recordRadioEvent( 'Username Change Blog Action' ) }
+							onClick={ this.getRadioHandler( 'Username Change Blog Action' ) }
 							value={ key }
 							checked={ key === this.state.usernameAction }
 						/>
@@ -624,7 +657,7 @@ const Account = createReactClass( {
 					<FormTextInput
 						id="username_confirm"
 						name="username_confirm"
-						onFocus={ this.recordFocusEvent( 'Username Confirm Field' ) }
+						onFocus={ this.getFocusHandler( 'Username Confirm Field' ) }
 						value={ this.state.userLoginConfirm }
 						onChange={ this.updateUserLoginConfirm }
 					/>
@@ -663,7 +696,7 @@ const Account = createReactClass( {
 								myProfileLink: (
 									<a
 										href="/me"
-										onClick={ this.recordClickEvent(
+										onClick={ this.getClickHandler(
 											'My Profile Link in Username Change',
 											this.props.markSaved
 										) }
@@ -691,7 +724,7 @@ const Account = createReactClass( {
 					<FormButton
 						disabled={ isSaveButtonDisabled }
 						type="button"
-						onClick={ this.recordClickEvent( 'Change Username Button', this.submitUsernameForm ) }
+						onClick={ this.getClickHandler( 'Change Username Button', this.submitUsernameForm ) }
 					>
 						{ translate( 'Save Username' ) }
 					</FormButton>
@@ -699,7 +732,7 @@ const Account = createReactClass( {
 					<FormButton
 						isPrimary={ false }
 						type="button"
-						onClick={ this.recordClickEvent(
+						onClick={ this.getClickHandler(
 							'Cancel Username Change Button',
 							this.cancelUsernameChange
 						) }
@@ -732,7 +765,7 @@ const Account = createReactClass( {
 								}
 								id="user_login"
 								name="user_login"
-								onFocus={ this.recordFocusEvent( 'Username Field' ) }
+								onFocus={ this.getFocusHandler( 'Username Field' ) }
 								onChange={ this.handleUsernameChange }
 								value={ this.getUserSetting( 'user_login' ) || '' }
 							/>
@@ -760,7 +793,11 @@ export default compose(
 		state => ( {
 			requestingMissingSites: isRequestingMissingSites( state ),
 		} ),
-		dispatch => bindActionCreators( { successNotice, errorNotice, recordTracksEvent }, dispatch )
+		dispatch =>
+			bindActionCreators(
+				{ successNotice, errorNotice, recordGoogleEvent, recordTracksEvent },
+				dispatch
+			)
 	),
 	localize,
 	protectForm
