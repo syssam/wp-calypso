@@ -7,7 +7,11 @@ import { keyBy, get } from 'lodash';
 /**
  * Internal dependencies
  */
-import { READER_POSTS_RECEIVE, READER_POST_SEEN } from 'state/action-types';
+import {
+	READER_POSTS_RECEIVE,
+	READER_POST_SEEN,
+	READER_STREAMS_PAGE_RECEIVE,
+} from 'state/action-types';
 import { combineReducers } from 'state/utils';
 
 /**
@@ -19,9 +23,10 @@ import { combineReducers } from 'state/utils';
  */
 export function items( state = {}, action ) {
 	switch ( action.type ) {
-		case READER_POSTS_RECEIVE: {
-			return { ...state, ...keyBy( action.posts, 'global_ID' ) };
-		}
+		case READER_POSTS_RECEIVE:
+		case READER_STREAMS_PAGE_RECEIVE:
+			const posts = action.posts || action.payload.posts;
+			return { ...state, ...keyBy( posts, 'global_ID' ) };
 	}
 	return state;
 }

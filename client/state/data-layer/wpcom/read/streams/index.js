@@ -16,9 +16,9 @@ import { receivePage } from 'state/reader/streams/actions';
 import { errorNotice } from 'state/notices/actions';
 
 /**
- * Pull the suffix off of a stream ID
+ * Pull the suffix off of a stream key
  *
- * A stream id is a : delimited string, with the form
+ * A stream key is a : delimited string, with the form
  * {prefix}:{suffix}
  *
  * Prefix cannot contain a colon, while the suffix may.
@@ -67,11 +67,9 @@ const streamApis = {
 		path: ( { streamKey } ) => `/read/sites/${ streamKeySuffix( streamKey ) }/featured`,
 	},
 	a8c: {
-		match: /^a8c$/,
 		path: () => '/read/a8c',
 	},
 	a8c_conversations: {
-		match: /^a8c_conversations$/,
 		path: () => '/read/conversations',
 		query: () => ( { index: 'a8c' } ),
 	},
@@ -138,6 +136,8 @@ export function requestPage( action ) {
  */
 export function fromApi( data ) {
 	//TODO schema validation?
+	this.oldestPostDate = get( data, [ 'date_range', 'after' ] );
+	this.lastPageHandle = get( data, [ 'meta', 'next_page' ], null );
 	return ( data && data.posts ) || [];
 }
 
