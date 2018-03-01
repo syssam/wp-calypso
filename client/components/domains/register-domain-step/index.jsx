@@ -259,7 +259,7 @@ class RegisterDomainStep extends React.Component {
 	}
 
 	focusSearchCard = () => {
-		this.refs.searchCard.focus();
+		this.searchCard.focus();
 	};
 
 	isLoadingSuggestions() {
@@ -273,7 +273,7 @@ class RegisterDomainStep extends React.Component {
 			<div className="register-domain-step">
 				<div className="register-domain-step__search">
 					<SearchCard
-						ref="searchCard"
+						ref={ searchCard => ( this.searchCard = searchCard ) } // eslint-disable-line react/jsx-no-bind
 						additionalClasses={ this.state.clickedExampleSuggestion ? 'is-refocused' : undefined }
 						initialValue={ this.state.lastQuery }
 						onSearch={ this.onSearch }
