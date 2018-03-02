@@ -16,14 +16,14 @@ import { localize } from 'i18n-calypso';
 import ReaderMain from 'components/reader-main';
 import EmptyContent from './empty';
 import {
-	fetchNextPage,
+	requestPage,
 	selectFirstItem,
 	selectItem,
 	selectNextItem,
 	selectPrevItem,
 	showUpdates,
-	shufflePosts,
-} from 'lib/feed-stream-store/actions';
+	// shufflePosts,
+} from 'state/reader/streams/actions';
 import LikeStore from 'lib/like-store/like-store';
 import { likePost, unlikePost } from 'lib/like-store/actions';
 import LikeHelper from 'reader/like-helper';
@@ -73,7 +73,6 @@ function getDistanceBetweenRecs( totalSubs ) {
 
 class ReaderStream extends React.Component {
 	static propTypes = {
-		postsStore: PropTypes.object.isRequired,
 		recommendationsStore: PropTypes.object,
 		trackScrollPage: PropTypes.func.isRequired,
 		suppressSiteNameLink: PropTypes.bool,
@@ -114,64 +113,43 @@ class ReaderStream extends React.Component {
 		forcePlaceholders: false,
 	};
 
-	getStateFromStores( props = this.props ) {
-		const { postsStore: store, recommendationsStore, totalSubs } = props;
-
-		const posts = map( store.get(), props.transformStreamItems );
-		const recs = recommendationsStore ? recommendationsStore.get() : null;
-		// do we have enough recs? if we have a store, but not enough recs, we should fetch some more...
-		if ( recommendationsStore ) {
-			if (
-				! recs ||
-				recs.length < posts.length * ( RECS_PER_BLOCK / getDistanceBetweenRecs( totalSubs ) )
-			) {
-				if ( ! recommendationsStore.isFetchingNextPage() ) {
-					defer( () => fetchNextPage( recommendationsStore.id ) );
-				}
-			}
-		}
-
-		let items = this.state && this.state.items;
-		if ( ! this.state || posts !== this.state.posts || recs !== this.state.recs ) {
-			items = injectRecommendations( posts, recs, getDistanceBetweenRecs( totalSubs ) );
-		}
-
-		if ( props.shouldCombineCards ) {
-			items = combineCards( items );
-		}
-
-		return {
-			items,
-			posts,
-			recs,
-			updateCount: store.getUpdateCount(),
-			pendingPostKeys: store.getPendingPostKeys(),
-			selectedPostKey: store.getSelectedPostKey(),
-			isFetchingNextPage: store.isFetchingNextPage && store.isFetchingNextPage(),
-			isLastPage: store.isLastPage(),
-		};
+	getStateFromStores() {
+		// const posts = map( store.get(), props.transformStreamItems );
+		// const recs = recommendationsStore ? recommendationsStore.get() : null;
+		// // do we have enough recs? if we have a store, but not enough recs, we should fetch some more...
+		// if ( recommendationsStore ) {
+		// 	if (
+		// 		! recs ||
+		// 		recs.length < posts.length * ( RECS_PER_BLOCK / getDistanceBetweenRecs( totalSubs ) )
+		// 	) {
+		// 		if ( ! recommendationsStore.isFetchingNextPage() ) {
+		// 			defer( () => fetchNextPage( recommendationsStore.id ) );
+		// 		}
+		// 	}
+		// }
+		// let items = this.state && this.state.items;
+		// if ( ! this.state || posts !== this.state.posts || recs !== this.state.recs ) {
+		// 	items = injectRecommendations( posts, recs, getDistanceBetweenRecs( totalSubs ) );
+		// }
+		// if ( props.shouldCombineCards ) {
+		// 	items = combineCards( items );
+		// }
 	}
 
-	state = this.getStateFromStores();
-
-	updateState = ( props = this.props ) => {
-		this.setState( this.getStateFromStores( props ) );
-	};
-
 	componentDidUpdate( prevProps, prevState ) {
-		if ( ! keysAreEqual( prevState.selectedPostKey, this.state.selectedPostKey ) ) {
-			this.scrollToSelectedPost( true );
-			if ( this.isPostFullScreen() ) {
-				showSelectedPost( {
-					store: this.props.postsStore,
-					replaceHistory: true,
-				} );
-			}
-		}
+		// if ( ! keysAreEqual( prevState.selectedPostKey, this.state.selectedPostKey ) ) {
+		// 	this.scrollToSelectedPost( true );
+		// 	if ( this.isPostFullScreen() ) {
+		// 		showSelectedPost( {
+		// 			streamKey: this.props.streamKey,
+		// 			replaceHistory: true,
+		// 		} );
+		// 	}
+		// }
 	}
 
 	_popstate = () => {
-		if ( this.state.selectedPostKey && history.scrollRestoration !== 'manual' ) {
+		if ( this.props.selectedPostKey && history.scrollRestoration !== 'manual' ) {
 			this.scrollToSelectedPost( false );
 		}
 	};
@@ -199,7 +177,6 @@ class ReaderStream extends React.Component {
 	}
 
 	componentDidMount() {
-		this.props.postsStore.on( 'change', this.updateState );
 		this.props.recommendationsStore &&
 			this.props.recommendationsStore.on( 'change', this.updateState );
 		this.props.resetCardExpansions();
@@ -216,7 +193,6 @@ class ReaderStream extends React.Component {
 	}
 
 	componentWillUnmount() {
-		this.props.postsStore.off( 'change', this.updateState );
 		this.props.recommendationsStore &&
 			this.props.recommendationsStore.off( 'change', this.updateState );
 
@@ -232,31 +208,20 @@ class ReaderStream extends React.Component {
 	}
 
 	componentWillReceiveProps( nextProps ) {
-		if ( nextProps.postsStore !== this.props.postsStore ) {
-			this.props.postsStore.off( 'change', this.updateState );
-			this.props.recommendationsStore &&
-				this.props.recommendationsStore.off( 'change', this.updateState );
-
-			nextProps.postsStore.on( 'change', this.updateState );
-			nextProps.recommendationsStore &&
-				nextProps.recommendationsStore.on( 'change', this.updateState );
+		if ( nextProps.streamKey !== this.props.streamKey ) {
 			this.props.resetCardExpansions();
-
-			this.updateState( nextProps );
-			this._list && this._list.reset();
 		}
 	}
 
 	handleOpenSelection = () => {
-		const selectedPostKey = this.props.postsStore.getSelectedPostKey();
 		showSelectedPost( {
-			store: this.props.postsStore,
-			postKey: selectedPostKey,
+			store: this.props.streamKey,
+			postKey: this.props.selectedPostKey,
 		} );
 	};
 
 	toggleLikeOnSelectedPost = () => {
-		const postKey = this.props.postsStore.getSelectedPostKey();
+		const { selectedPostKey: postKey } = this.props;
 		let post;
 
 		if ( postKey && ! postKey.isGap ) {
@@ -296,10 +261,11 @@ class ReaderStream extends React.Component {
 	}
 
 	goToTop = () => {
-		if ( this.state.updateCount && this.state.updateCount > 0 ) {
-			this.showUpdates();
+		const { streamKey, updateCount } = this.props;
+		if ( updateCount > 0 ) {
+			this.props.showUpdates( { streamKey } );
 		} else {
-			selectFirstItem( this.props.postsStore.id );
+			this.props.selectFirstItem( { streamKey } );
 		}
 	};
 
@@ -308,14 +274,14 @@ class ReaderStream extends React.Component {
 	}
 
 	selectNextItem = () => {
+		const { streamKey, items, posts } = this.props;
 		// do we have a selected item? if so, just move to the next one
-		if ( this.state.selectedPostKey ) {
-			selectNextItem( this.props.postsStore.id );
+		if ( this.props.selectedPostKey ) {
+			this.props.selectNextItem( { streamKey, items } );
 			return;
 		}
 
 		const visibleIndexes = this.getVisibleItemIndexes();
-		const { items, posts } = this.state;
 
 		// This is slightly magical...
 		// When a user tries to select the "next" item, we really want to select
@@ -349,7 +315,7 @@ class ReaderStream extends React.Component {
 				} else {
 					postKey.blogId = candidateItem.blogId;
 				}
-				selectItem( this.props.postsStore.id, postKey );
+				this.props.selectItem( { streamKey, postKey } );
 			}
 
 			// find the index of the post / gap in the posts array.
@@ -357,46 +323,49 @@ class ReaderStream extends React.Component {
 			// the index in the posts array.
 			// Use lastIndexOf to walk the array from right to left
 			const selectedPostKey = findLast( posts, items[ index ], index );
-			if ( keysAreEqual( selectedPostKey, this.state.selectedPostKey ) ) {
-				selectNextItem( this.props.postsStore.id );
+			if ( keysAreEqual( selectedPostKey, this.props.selectedPostKey ) ) {
+				this.props.selectNextItem( { streamKey, items } );
 			} else {
-				selectItem( this.props.postsStore.id, selectedPostKey );
+				this.props.selectItem( { streamKey, postKey: selectedPostKey } );
 			}
 		}
 	};
 
 	selectPrevItem = () => {
+		const { streamKey, selectedPostKey, items } = this.props;
 		// unlike selectNextItem, we don't want any magic here. Just move back an item if the user
 		// currently has a selected item. Otherwise do nothing.
 		// We avoid the magic here because we expect users to enter the flow using next, not previous.
-		if ( this.state.selectedPostKey ) {
-			selectPrevItem( this.props.postsStore.id );
+		if ( selectedPostKey ) {
+			this.props.selectPrevItem( { streamKey, items } );
 		}
 	};
 
 	fetchNextPage = options => {
-		if ( this.props.postsStore.isLastPage() || this.props.postsStore.isFetchingNextPage() ) {
-			return;
-		}
 		if ( options.triggeredByScroll ) {
-			this.props.trackScrollPage( this.props.postsStore.getPage() + 1 );
+			// this.props.trackScrollPage( this.props.postsStore.getPage() + 1 );
 		}
-		fetchNextPage( this.props.postsStore.id );
+		this.props.requestPage( {
+			streamKey: this.props.streamKey,
+			pageHandle: this.props.stream.pageHandle,
+		} );
 	};
 
 	showUpdates = () => {
+		const { streamKey } = this.props;
 		this.props.onUpdatesShown();
-		showUpdates( this.props.postsStore.id );
-		if ( this.props.recommendationsStore ) {
-			shufflePosts( this.props.recommendationsStore.id );
-		}
-		if ( this._list ) {
-			this._list.scrollToTop();
-		}
+		this.props.showUpdates( { streamKey } );
+		// if ( this.props.recommendationsStore ) {
+		// 	shufflePosts( this.props.recommendationsStore.id );
+		// }
+		// if ( this._list ) {
+		// 	this._list.scrollToTop();
+		// }
 	};
 
 	renderLoadingPlaceholders = () => {
-		const count = this.state.posts.length ? 2 : this.props.postsStore.getPerPage();
+		const { posts } = this.props;
+		const count = posts.length ? 2 : 4; // @TODO: figure out what numbers should go here and make sensible const
 
 		return times( count, i => {
 			if ( this.props.placeholderFactory ) {
@@ -411,8 +380,8 @@ class ReaderStream extends React.Component {
 	};
 
 	renderPost = ( postKey, index ) => {
-		const recStoreId = this.props.recommendationsStore && this.props.recommendationsStore.id;
-		const selectedPostKey = this.props.postsStore.getSelectedPostKey();
+		const { selectedPostKey, streamKey } = this.props;
+		// const recStoreId = this.props.recommendationsStore && this.props.recommendationsStore.id;
 		const isSelected = !! (
 			selectedPostKey &&
 			selectedPostKey.postId === postKey.postId &&
@@ -424,7 +393,7 @@ class ReaderStream extends React.Component {
 			showSelectedPost( {
 				...args,
 				postKey: postKey.isCombination ? keyForPost( args ) : postKey,
-				store: this.props.postsStore,
+				streamKey,
 			} );
 
 		return (
@@ -434,7 +403,6 @@ class ReaderStream extends React.Component {
 				isSelected={ isSelected }
 				handleClick={ showPost }
 				postKey={ postKey }
-				postsStore={ this.props.postsStore }
 				suppressSiteNameLink={ this.props.suppressSiteNameLink }
 				showPostHeader={ this.props.showPostHeader }
 				showFollowInHeader={ this.props.showFollowInHeader }
@@ -445,27 +413,27 @@ class ReaderStream extends React.Component {
 				blockedSites={ this.props.blockedSites }
 				index={ index }
 				selectedPostKey={ selectedPostKey }
-				recStoreId={ recStoreId }
+				// recStoreId={ recStoreId }
 				compact={ this.props.useCompactCards }
 			/>
 		);
 	};
 
 	render() {
-		const { forcePlaceholders, postsStore: store } = this.props;
-		let { items, isFetchingNextPage } = this.state;
+		const { forcePlaceholders, posts, pendingItems, updateCount, lastPage } = this.props;
+		let { items, isRequesting } = this.props;
 
-		const hasNoPosts =
-			store.isLastPage() && ( ! this.state.posts || this.state.posts.length === 0 );
+		const hasNoPosts = false && posts.length === 0;
 		let body, showingStream;
 
 		// trick an infinite list to showing placeholders
 		if ( forcePlaceholders ) {
 			items = [];
-			isFetchingNextPage = true;
+			isRequesting = true;
 		}
 
-		if ( hasNoPosts || store.hasRecentError( 'invalid_tag' ) ) {
+		// @TODO: has error of invalid tag?
+		if ( hasNoPosts ) {
 			body = this.props.emptyContent;
 			if ( ! body && this.props.showDefaultEmptyContentIfMissing ) {
 				body = <EmptyContent />;
@@ -477,8 +445,8 @@ class ReaderStream extends React.Component {
 					ref={ c => ( this._list = c ) }
 					className="reader__content"
 					items={ items }
-					lastPage={ this.state.isLastPage }
-					fetchingNextPage={ isFetchingNextPage }
+					lastPage={ lastPage }
+					fetchingNextPage={ isRequesting }
 					guessedItemHeight={ GUESSED_POST_HEIGHT }
 					fetchNextPage={ this.fetchNextPage }
 					getItemRef={ this.getPostRef }
@@ -499,25 +467,53 @@ class ReaderStream extends React.Component {
 					) }
 
 				<UpdateNotice
-					count={ this.state.updateCount }
-					onClick={ this.showUpdates }
-					pendingPostKeys={ this.state.pendingPostKeys }
+					count={ updateCount }
+					onClick={ this.props.showUpdates }
+					pendingPostKeys={ pendingItems }
 				/>
 				{ this.props.children }
-				{ showingStream && this.state.posts.length ? this.props.intro : null }
+				{ showingStream && posts.length ? this.props.intro : null }
 				{ body }
-				{ showingStream && store.isLastPage() && this.state.posts.length ? <ListEnd /> : null }
+				{ showingStream && false /*TODO: make work */ && posts.length && <ListEnd /> }
 			</TopLevel>
 		);
 	}
 }
 
+/**
+ *
+ * @param {*} state redux global state
+ * @param {*} streamKey key of the stream to get
+ *
+ * @returns {Object} Stream of type { items: Array<PostKey>, pendingItems: Array<PostKey> }
+ */
+const emptyStream = { items: [], pendingItems: [], lastPage: false, isRequesting: false };
+function getStream( state, streamKey ) {
+	return state.reader.streams[ streamKey ] || emptyStream;
+}
+
 export default localize(
 	connect(
-		state => ( {
+		( state, { streamKey } ) => ( {
 			blockedSites: getBlockedSites( state ),
 			totalSubs: getReaderFollows( state ).length,
+			stream: getStream( state, streamKey ),
+			items: getStream( state, streamKey ).items,
+			posts: getStream( state, streamKey ).items,
+			pendingItems: getStream( state, streamKey ).pendingItems,
+			updateCount: getStream( state, streamKey ).pendingItems.length,
+			selectedPostKey: getStream( state, streamKey ).selected,
+			lastPage: getStream( state, streamKey ).lastPage,
+			isRequesting: getStream( state, streamKey ).isRequesting,
 		} ),
-		{ resetCardExpansions }
+		{
+			resetCardExpansions,
+			requestPage,
+			selectItem,
+			selectNextItem,
+			selectPrevItem,
+			showUpdates,
+			// shufflePosts,
+		}
 	)( ReaderStream )
 );

@@ -127,15 +127,12 @@ const exported = {
 	},
 
 	following( context, next ) {
-		const basePath = sectionify( context.path ),
-			fullAnalyticsPageTitle = analyticsPageTitle + ' > Following',
-			followingStore = feedStreamFactory( 'following' ),
-			mcKey = 'following';
+		const basePath = sectionify( context.path );
+		const fullAnalyticsPageTitle = analyticsPageTitle + ' > Following';
+		const mcKey = 'following';
 
 		const recommendationsStore = feedStreamFactory( 'custom_recs_posts_with_images' );
 		recommendationsStore.perPage = 4;
-
-		ensureStoreLoading( followingStore, context );
 
 		trackPageLoad( basePath, fullAnalyticsPageTitle, mcKey );
 		recordTrack( 'calypso_reader_following_loaded' );
@@ -146,8 +143,7 @@ const exported = {
 		context.primary = React.createElement( StreamComponent, {
 			key: 'following',
 			listName: i18n.translate( 'Followed Sites' ),
-			postsStore: followingStore,
-			recommendationsStore,
+			streamKey: 'following',
 			showPrimaryFollowButtonOnCards: false,
 			trackScrollPage: trackScrollPage.bind(
 				null,

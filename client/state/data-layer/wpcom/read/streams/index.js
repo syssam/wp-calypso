@@ -3,8 +3,9 @@
 /**
  * External dependencies
  */
-import { random } from 'lodash';
+import { random, pickBy } from 'lodash';
 import { translate } from 'i18n-calypso';
+
 /**
  * Internal dependencies
  */
@@ -14,6 +15,7 @@ import warn from 'lib/warn';
 import { READER_STREAMS_PAGE_REQUEST } from 'state/action-types';
 import { receivePage } from 'state/reader/streams/actions';
 import { errorNotice } from 'state/notices/actions';
+import { receivePosts } from 'state/reader/posts/actions';
 
 /**
  * Pull the suffix off of a stream key
@@ -41,12 +43,17 @@ function getSeedForQuery() {
 	return random( 0, 10000 );
 }
 
+export const getQueryString = ( { metaExtras } = {} ) => ( extras = {} ) => {
+	const meta = `post,discover_original_post${ !! metaExtras ? ',' + metaExtras : '' }`;
+	return { orderBy: 'date', meta, ...extras };
+};
 // Each object is a composed of:
 //   path: a function that given the action, returns The API path to hit
-//   query: a function that given the action, returns the query to use.
+//   query: a function that given the action, returns the querystring to use.
 const streamApis = {
 	following: {
 		path: () => '/read/following',
+		query: getQueryString(),
 	},
 	search: {
 		path: () => '/read/search',
@@ -109,7 +116,7 @@ const streamApis = {
  * @returns {object} http action for data-layer to dispatch
  */
 export function requestPage( action ) {
-	const { payload: { streamKey, streamType } } = action;
+	const { payload: { streamKey, streamType, pageHandle } } = action;
 	const api = streamApis[ streamType ];
 
 	if ( ! api ) {
@@ -121,9 +128,9 @@ export function requestPage( action ) {
 
 	return http( {
 		method: 'GET',
-		path: path( action.payload ),
+		path: path( { ...action.payload } ),
 		apiVersion,
-		query: query ? query( action.payload ) : {},
+		query: query ? query( { ...pageHandle } ) : {},
 		onSuccess: action,
 		onFailure: action,
 	} );
@@ -135,15 +142,16 @@ export function requestPage( action ) {
  * @return {Object}      The transformed data
  */
 export function fromApi( data ) {
-	//TODO schema validation?
-	this.oldestPostDate = get( data, [ 'date_range', 'after' ] );
-	this.lastPageHandle = get( data, [ 'meta', 'next_page' ], null );
-	return ( data && data.posts ) || [];
+	return data;
+	// return ( data && data.posts ) || [];
 }
 
-export function handlePage( action, posts ) {
+export function handlePage( action, data ) {
+	const { posts, date_range } = data;
 	const { streamKey, query } = action.payload;
-	return receivePage( { streamKey, query, posts } );
+	const { before } = date_range;
+	const pageHandle = { before };
+	return [ receivePosts( posts ), receivePage( { streamKey, query, posts, pageHandle } ) ];
 }
 
 export function handleError() {

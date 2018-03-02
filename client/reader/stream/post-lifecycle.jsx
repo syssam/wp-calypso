@@ -69,7 +69,6 @@ class PostLifecycle extends React.Component {
 			return (
 				<ListGap
 					gap={ postKey }
-					postsStore={ this.props.postsStore }
 					selected={ this.props.isSelected }
 					handleClick={ this.props.handleClick }
 				/>
@@ -87,13 +86,13 @@ class PostLifecycle extends React.Component {
 			return <PostBlocked post={ post } />;
 		} else if ( isXPost( post ) ) {
 			const xMetadata = XPostHelper.getXPostMetadata( post );
-			const xPostedTo = this.props.postsStore.getSitesCrossPostedTo(
-				xMetadata.commentURL || xMetadata.postURL
-			);
+			// const xPostedTo = this.props.postsStore.getSitesCrossPostedTo(
+			// 	xMetadata.commentURL || xMetadata.postURL
+			// );
 			return (
 				<CrossPost
 					{ ...omit( this.props, 'store' ) }
-					xPostedTo={ xPostedTo }
+					// xPostedTo={ xPostedTo }
 					xMetadata={ xMetadata }
 					post={ post }
 					postKey={ postKey }
@@ -101,8 +100,8 @@ class PostLifecycle extends React.Component {
 			);
 		}
 
-		const xPostedTo = this.props.postsStore.getSitesCrossPostedTo( post.URL );
-		return <Post { ...this.props } xPostedTo={ xPostedTo } />;
+		// const xPostedTo = this.props.postsStore.getSitesCrossPostedTo( post.URL );
+		return <Post { ...this.props } /* xPostedTo={ xPostedTo }  */ />;
 	}
 }
 
