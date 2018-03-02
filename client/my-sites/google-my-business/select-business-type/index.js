@@ -51,12 +51,12 @@ class SelectBusinessType extends Component {
 			authorization_code: code,
 		};
 
-		this.props.connectSocialUser( socialInfo ).then( wpcomResponse => {
+		this.props.connectSocialUser( socialInfo ).then( ( { access_token } ) => {
 			request
 				.get( 'https://mybusiness.googleapis.com/v4/accounts' )
 				.set( {
 					'Content-Type': 'application/json',
-					Authorization: 'Bearer ' + wpcomResponse.access_token,
+					Authorization: 'Bearer ' + access_token.access_token,
 				} )
 				.then( ( { body: accounts } ) => {
 					// eslint-disable-next-line no-console
