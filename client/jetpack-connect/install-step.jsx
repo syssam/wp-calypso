@@ -23,7 +23,6 @@ class JetpackInstallStep extends Component {
 	static propTypes = {
 		confirmJetpackInstallStatus: PropTypes.func.isRequired,
 		currentUrl: PropTypes.string,
-		isInstall: PropTypes.bool.isRequired,
 		jetpackVersion: PropTypes.oneOfType( [ PropTypes.string, PropTypes.bool ] ),
 		onClick: PropTypes.func,
 	};
@@ -68,7 +67,7 @@ class JetpackInstallStep extends Component {
 	}
 
 	getStep( stepName ) {
-		const { currentUrl, isInstall, jetpackVersion, onClick, translate } = this.props;
+		const { currentUrl, jetpackVersion, onClick, translate } = this.props;
 
 		const isLegacyVersion =
 			jetpackVersion && versionCompare( jetpackVersion, NEW_INSTRUCTIONS_JETPACK_VERSION, '<' );
@@ -80,15 +79,10 @@ class JetpackInstallStep extends Component {
 		const steps = {
 			installJetpack: {
 				title: translate( '1. Install Jetpack' ),
-				text: isInstall
-					? translate(
-							"You will be redirected to your site's dashboard to install " +
-								'Jetpack. Click the blue "Install Now" button.'
-						)
-					: translate(
-							"You will be redirected to the Jetpack plugin page on your site's " +
-								'dashboard to install Jetpack. Click the blue install button.'
-						),
+				text: translate(
+					"You will be redirected to the Jetpack plugin page on your site's " +
+						'dashboard to install Jetpack. Click the blue install button.'
+				),
 				action: this.renderAlreadyHaveJetpackButton(),
 				example: <JetpackExampleInstall url={ currentUrl } onClick={ onClick } />,
 			},
