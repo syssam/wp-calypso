@@ -15,7 +15,7 @@ import { scaleLinear as d3ScaleLinear } from 'd3-scale';
  */
 import { formatValue } from 'woocommerce/app/store-stats/utils';
 
-const HorizontalBar = ( { className, data, extent, margin, currency, height, width } ) => {
+const HorizontalBar = ( { className, data, extent, currency, height, width } ) => {
 	const numberFormat = currency ? 'currency' : 'number';
 	const drawChart = ( svg, { scale, height: calculatedHeight } ) => {
 		const xPos = scale( data );
@@ -34,25 +34,28 @@ const HorizontalBar = ( { className, data, extent, margin, currency, height, wid
 			.attr( 'text-anchor', 'end' )
 			.attr( 'fill', 'white' )
 			.text( formatValue( data, numberFormat, currency ) );
-
-		const isOffsetText = xPos - ( text.node().getComputedTextLength() + 5 ) <= 0;
-
+		const textMargin = data === 0 ? 0 : 5;
+		const isOffsetText = xPos - ( text.node().getBoundingClientRect().width + textMargin ) <= 0;
 		text
 			.attr( 'class', isOffsetText ? 'is-offset-text' : '' )
 			.attr( 'text-anchor', isOffsetText ? 'start' : 'end' )
-			.attr( 'x', isOffsetText ? xPos + 5 : xPos - 5 )
-			.attr( 'y', calculatedHeight / 2 + margin.top );
+			.attr( 'x', isOffsetText ? xPos + textMargin : xPos - textMargin )
+			.attr( 'y', calculatedHeight / 2 )
+			.attr( 'dy', '0.4em' );
 
 		return svg;
 	};
 
-	const getParams = node => ( {
-		width: width || node.offsetWidth,
-		height: height || node.offsetHeight,
-		scale: d3ScaleLinear()
-			.domain( extent )
-			.range( [ 0, node.offsetWidth - margin.right ] ),
-	} );
+	const getParams = node => {
+		const calculatedWidth = width || node.offsetWidth;
+		return {
+			width: calculatedWidth,
+			height: height || node.offsetHeight,
+			scale: d3ScaleLinear()
+				.domain( extent )
+				.range( [ 0, calculatedWidth ] ),
+		};
+	};
 
 	return (
 		<D3Base
@@ -69,22 +72,7 @@ HorizontalBar.propTypes = {
 	data: PropTypes.number.isRequired,
 	extent: PropTypes.arrayOf( PropTypes.number ).isRequired,
 	height: PropTypes.number,
-	margin: PropTypes.shape( {
-		top: PropTypes.number,
-		right: PropTypes.number,
-		bottom: PropTypes.number,
-		left: PropTypes.number,
-	} ),
 	width: PropTypes.number,
-};
-
-HorizontalBar.defaultProps = {
-	margin: {
-		top: 4,
-		right: 4,
-		bottom: 4,
-		left: 4,
-	},
 };
 
 export default HorizontalBar;
