@@ -24,6 +24,7 @@ import {
 	showUpdates,
 	// shufflePosts,
 } from 'state/reader/streams/actions';
+import { getStream } from 'state/reader/streams/selectors';
 import LikeStore from 'lib/like-store/like-store';
 import { likePost, unlikePost } from 'lib/like-store/actions';
 import LikeHelper from 'reader/like-helper';
@@ -44,6 +45,7 @@ import { resetCardExpansions } from 'state/ui/reader/card-expansions/actions';
 import { combineCards, injectRecommendations, RECS_PER_BLOCK } from './utils';
 import { reduxGetState } from 'lib/redux-bridge';
 import { getPostByKey } from 'state/reader/posts/selectors';
+import { viewStream } from 'state/reader/watermarks/actions';
 
 const GUESSED_POST_HEIGHT = 600;
 const HEADER_OFFSET_TOP = 46;
@@ -136,16 +138,10 @@ class ReaderStream extends React.Component {
 		// }
 	}
 
-	componentDidUpdate( prevProps, prevState ) {
-		// if ( ! keysAreEqual( prevState.selectedPostKey, this.state.selectedPostKey ) ) {
-		// 	this.scrollToSelectedPost( true );
-		// 	if ( this.isPostFullScreen() ) {
-		// 		showSelectedPost( {
-		// 			streamKey: this.props.streamKey,
-		// 			replaceHistory: true,
-		// 		} );
-		// 	}
-		// }
+	componentDidUpdate( { selectedPostKey } ) {
+		if ( ! keysAreEqual( selectedPostKey, this.props.selectedPostKey ) ) {
+			this.scrollToSelectedPost( true );
+		}
 	}
 
 	_popstate = () => {
@@ -177,9 +173,11 @@ class ReaderStream extends React.Component {
 	}
 
 	componentDidMount() {
+		const { streamKey } = this.props;
 		this.props.recommendationsStore &&
 			this.props.recommendationsStore.on( 'change', this.updateState );
 		this.props.resetCardExpansions();
+		this.props.viewStream( { streamKey } );
 
 		KeyboardShortcuts.on( 'move-selection-down', this.selectNextItem );
 		KeyboardShortcuts.on( 'move-selection-up', this.selectPrevItem );
@@ -208,8 +206,10 @@ class ReaderStream extends React.Component {
 	}
 
 	componentWillReceiveProps( nextProps ) {
-		if ( nextProps.streamKey !== this.props.streamKey ) {
+		const { streamKey } = nextProps;
+		if ( streamKey !== this.props.streamKey ) {
 			this.props.resetCardExpansions();
+			this.props.viewStream( { streamKey } );
 		}
 	}
 
@@ -232,9 +232,6 @@ class ReaderStream extends React.Component {
 		// and original post is full screen
 		const xPostMetadata = XPostHelper.getXPostMetadata( post );
 		if ( !! xPostMetadata.postURL ) {
-			if ( this.isPostFullScreen() && xPostMetadata.blogId && xPostMetadata.postId ) {
-				this.toggleLikeAction( xPostMetadata.blogId, xPostMetadata.postId );
-			}
 			return;
 		}
 
@@ -252,12 +249,6 @@ class ReaderStream extends React.Component {
 
 		const toggler = liked ? unlikePost : likePost;
 		toggler( siteId, postId );
-	}
-
-	isPostFullScreen() {
-		return !! window.location.pathname.match(
-			/^\/read\/(blogs|feeds)\/([0-9]+)\/posts\/([0-9]+)$/i
-		);
 	}
 
 	goToTop = () => {
@@ -480,18 +471,6 @@ class ReaderStream extends React.Component {
 	}
 }
 
-/**
- *
- * @param {*} state redux global state
- * @param {*} streamKey key of the stream to get
- *
- * @returns {Object} Stream of type { items: Array<PostKey>, pendingItems: Array<PostKey> }
- */
-const emptyStream = { items: [], pendingItems: [], lastPage: false, isRequesting: false };
-function getStream( state, streamKey ) {
-	return state.reader.streams[ streamKey ] || emptyStream;
-}
-
 export default localize(
 	connect(
 		( state, { streamKey } ) => ( {
@@ -513,6 +492,7 @@ export default localize(
 			selectNextItem,
 			selectPrevItem,
 			showUpdates,
+			viewStream,
 			// shufflePosts,
 		}
 	)( ReaderStream )

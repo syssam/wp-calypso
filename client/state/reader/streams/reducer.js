@@ -97,18 +97,4 @@ const streamReducer = combineReducers( {
 	pageHandle,
 } );
 
-/**
- * Holds the last touched stream for the purposes of keyboard navigation
- *
- * @param {*} state
- * @param {*} action
- */
-export const currentStream = ( state = null, action ) => {
-	switch ( action.type ) {
-		case READER_STREAMS_SELECT_ITEM:
-			return action.payload.streamKey;
-	}
-	return state;
-};
-
 export default keyedReducer( 'payload.streamKey', streamReducer );
