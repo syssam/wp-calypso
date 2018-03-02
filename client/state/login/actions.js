@@ -301,6 +301,8 @@ export const connectSocialUser = ( socialInfo, redirectTo ) => dispatch => {
 					type: SOCIAL_CONNECT_ACCOUNT_REQUEST_SUCCESS,
 					redirect_to: wpcomResponse.redirect_to,
 				} );
+
+				return wpcomResponse;
 			},
 			wpcomError => {
 				const error = getErrorFromWPCOMError( wpcomError );
