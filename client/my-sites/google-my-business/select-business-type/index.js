@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { localize } from 'i18n-calypso';
 import { connect } from 'react-redux';
 import page from 'page';
+import request from 'superagent';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ import { recordTracksEvent } from 'state/analytics/actions';
 import config from 'config';
 import GoogleLoginButton from 'components/social-buttons/google';
 import { preventWidows as preventWidowFormatting } from 'lib/formatting';
+import { connectSocialUser } from 'state/login/actions';
 
 class SelectBusinessType extends Component {
 	static propTypes = {
@@ -43,8 +45,25 @@ class SelectBusinessType extends Component {
 		page.back( `/stats/day/${ this.props.siteId }` );
 	};
 
-	handleGoogleResponse = () => {
-		page.redirect( `/google-my-business/show-list-of-locations/${ this.props.siteId }` );
+	handleGoogleResponse = ( { code } ) => {
+		const socialInfo = {
+			service: 'google',
+			authorization_code: code,
+		};
+
+		this.props.connectSocialUser( socialInfo ).then( wpcomResponse => {
+			request
+				.get( 'https://mybusiness.googleapis.com/v4/accounts' )
+				.set( {
+					'Content-Type': 'application/json',
+					Authorization: 'Bearer ' + wpcomResponse.access_token,
+				} )
+				.then( ( { body: accounts } ) => {
+					// eslint-disable-next-line no-console
+					console.log( 'accounts', accounts );
+					page.redirect( `/google-my-business/show-list-of-locations/${ this.props.siteId }` );
+				} );
+		} );
 	};
 
 	render() {
@@ -92,12 +111,16 @@ class SelectBusinessType extends Component {
 					<div className="select-business-type__cta-card-button-container">
 						<GoogleLoginButton
 							clientId={ config( 'google_oauth_client_id' ) }
-							scope="https://www.googleapis.com/auth/plus.business.manage"
+							scope={ [
+								'https://www.googleapis.com/auth/userinfo.profile',
+								'https://www.googleapis.com/auth/plus.business.manage',
+							].join( ' ' ) }
 							responseHandler={ this.handleGoogleResponse }
 							uxMode={ 'popup' }
-							redirectUri={ '' }
+							redirectUri={ 'https://calypso.live' }
 							isPrimary={ true }
 							hideGoogleIcon={ true }
+							accessType={ 'offline' }
 						/>
 					</div>
 				</Card>
@@ -121,4 +144,6 @@ class SelectBusinessType extends Component {
 	}
 }
 
-export default connect( undefined, { recordTracksEvent } )( localize( SelectBusinessType ) );
+export default connect( undefined, { connectSocialUser, recordTracksEvent } )(
+	localize( SelectBusinessType )
+);

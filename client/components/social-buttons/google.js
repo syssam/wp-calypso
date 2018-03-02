@@ -32,11 +32,13 @@ class GoogleLoginButton extends Component {
 		responseHandler: PropTypes.func.isRequired,
 		translate: PropTypes.func.isRequired,
 		onClick: PropTypes.func,
-		hideGoogleIcon: PropTypes,
+		hideGoogleIcon: PropTypes.bool,
+		accessType: PropTypes.string,
 	};
 
 	static defaultProps = {
 		scope: 'https://www.googleapis.com/auth/userinfo.profile',
+		accessType: 'online',
 		fetchBasicProfile: true,
 		onClick: noop,
 	};
@@ -149,19 +151,28 @@ class GoogleLoginButton extends Component {
 			return;
 		}
 
-		const { responseHandler } = this.props;
+		const { accessType, responseHandler } = this.props;
+
+		const authUser = window.gapi.auth2.getAuthInstance();
+
+		if ( accessType === 'offline' ) {
+			// response handler format: function( { code } ) {}
+			return authUser.grantOfflineAccess().then( responseHandler );
+		}
 
 		// Options are documented here:
 		// https://developers.google.com/api-client-library/javascript/reference/referencedocs#gapiauth2signinoptions
-		window.gapi.auth2
-			.getAuthInstance()
-			.signIn( { prompt: 'select_account' } )
-			.then( responseHandler, error => {
-				this.props.recordTracksEvent( 'calypso_login_social_button_failure', {
-					social_account_type: 'google',
-					error_code: error.error,
-				} );
-			} );
+		return (
+			authUser
+				.signIn( { prompt: 'select_account' } )
+				// response handler format: function( currentUser ) {}
+				.then( responseHandler, error => {
+					this.props.recordTracksEvent( 'calypso_login_social_button_failure', {
+						social_account_type: 'google',
+						error_code: error.error,
+					} );
+				} )
+		);
 	}
 
 	showError( event ) {

@@ -358,11 +358,12 @@ UndocumentedMe.prototype.deletePurchase = function( purchaseId, fn ) {
  * @return {Promise} A promise for the request
  */
 UndocumentedMe.prototype.socialConnect = function(
-	{ service, access_token, id_token, redirect_to },
+	{ service, authorization_code, access_token, id_token, redirect_to },
 	fn
 ) {
 	const body = {
 		service,
+		authorization_code,
 		access_token,
 		id_token,
 		redirect_to,
