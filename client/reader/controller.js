@@ -13,7 +13,6 @@ import { abtest } from 'lib/abtest';
 import { sectionify } from 'lib/route';
 import feedLookup from 'lib/feed-lookup';
 import {
-	ensureStoreLoading,
 	trackPageLoad,
 	trackUpdatesLoaded,
 	trackScrollPage,
@@ -172,18 +171,17 @@ const exported = {
 		const basePath = '/read/feeds/:feed_id';
 		const fullAnalyticsPageTitle = analyticsPageTitle + ' > Feed > ' + context.params.feed_id;
 		const mcKey = 'blog';
+		const feedId = context.params.feed_id;
 
 		trackPageLoad( basePath, fullAnalyticsPageTitle, mcKey );
-		recordTrack( 'calypso_reader_blog_preview', {
-			feed_id: context.params.feed_id,
-		} );
+		recordTrack( 'calypso_reader_blog_preview', { feed_id: feedId } );
 
 		context.primary = (
 			<AsyncLoad
 				require="reader/feed-stream"
-				key={ 'feed-' + context.params.feed_id }
-				streamKey={ 'feed: ' + context.params.feed_id }
-				feedId={ +context.params.feed_id }
+				key={ 'feed-' + feedId }
+				streamKey={ 'feed:' + feedId }
+				feedId={ +feedId }
 				trackScrollPage={ trackScrollPage.bind(
 					null,
 					basePath,
@@ -205,7 +203,6 @@ const exported = {
 		const fullAnalyticsPageTitle = analyticsPageTitle + ' > Site > ' + context.params.blog_id;
 		const streamKey = 'site:' + context.params.blog_id;
 		const mcKey = 'blog';
-		console.error( streamKey );
 
 		trackPageLoad( basePath, fullAnalyticsPageTitle, mcKey );
 		recordTrack( 'calypso_reader_blog_preview', {

@@ -8,12 +8,7 @@ import React from 'react';
  * Internal dependencies
  */
 import trackScrollPage from 'lib/track-scroll-page';
-import {
-	ensureStoreLoading,
-	trackPageLoad,
-	trackUpdatesLoaded,
-	userHasHistory,
-} from 'reader/controller-helper';
+import { trackPageLoad, trackUpdatesLoaded, userHasHistory } from 'reader/controller-helper';
 import RecommendedPostsStream from 'reader/recommendations/posts';
 import { sectionify } from 'lib/route';
 import feedStreamFactory from 'lib/feed-stream-store';
@@ -59,8 +54,6 @@ const exported = {
 				RecommendedPostsStore = feedStreamFactory( 'custom_recs_posts_with_images' );
 				mcKey = 'custom_recs_posts_with_images';
 		}
-
-		ensureStoreLoading( RecommendedPostsStore, context );
 
 		trackPageLoad( basePath, fullAnalyticsPageTitle, mcKey );
 

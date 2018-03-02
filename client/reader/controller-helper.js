@@ -2,7 +2,6 @@
 /**
  * External Dependencies
  */
-import moment from 'moment';
 import i18n from 'i18n-calypso';
 
 /**
@@ -11,20 +10,6 @@ import i18n from 'i18n-calypso';
 import analytics from 'lib/analytics';
 import { recordTrack } from 'reader/stats';
 import { setDocumentHeadTitle as setTitle } from 'state/document-head/actions';
-import { fetchNextPage } from 'lib/feed-stream-store/actions';
-
-export function ensureStoreLoading( store, context ) {
-	if ( store.getPage() === 1 ) {
-		if ( context && context.query && context.query.at ) {
-			const startDate = moment( context.query.at );
-			if ( startDate.isValid() ) {
-				store.startDate = startDate.toISOString();
-			}
-		}
-		fetchNextPage( store.id );
-	}
-	return store;
-}
 
 export function trackPageLoad( path, title, readerView ) {
 	analytics.pageView.record( path, title );

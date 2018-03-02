@@ -10,7 +10,7 @@ import React from 'react';
 import { sectionify } from 'lib/route';
 import { recordTrack } from 'reader/stats';
 import AsyncLoad from 'components/async-load';
-import { trackPageLoad, trackScrollPage, ensureStoreLoading } from 'reader/controller-helper';
+import { trackPageLoad, trackScrollPage } from 'reader/controller-helper';
 
 export function conversations( context, next ) {
 	const basePath = sectionify( context.path );
