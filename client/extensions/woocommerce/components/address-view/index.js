@@ -74,20 +74,12 @@ class AddressView extends Component {
 		}
 	};
 
-	onChangeCountry = event => {
-		// First, always forward the country event through
-		this.props.onChange( event );
-
-		// Then, send a second onChange to clear state
-		this.props.onChange( { target: { name: 'state', value: '' } } );
-	};
-
 	renderEditableCountry = () => {
-		const { address: { country } } = this.props;
+		const { address: { country }, onChange } = this.props;
 
 		return (
 			<FormFieldSet className="address-view__country">
-				<FormCountrySelectFromApi value={ country } onChange={ this.onChangeCountry } />
+				<FormCountrySelectFromApi value={ country } onChange={ onChange } />
 			</FormFieldSet>
 		);
 	};
@@ -114,7 +106,12 @@ class AddressView extends Component {
 		if ( showAddressLine2 ) {
 			return (
 				<FormFieldSet>
-					<FormTextInput name="street2" onChange={ onChange } value={ street2 } />
+					<FormTextInput
+						autoComplete="address-line2"
+						name="street2"
+						onChange={ onChange }
+						value={ street2 }
+					/>
 				</FormFieldSet>
 			);
 		}
@@ -139,18 +136,33 @@ class AddressView extends Component {
 			<div className="address-view__fields-editable">
 				<FormFieldSet>
 					<FormLabel>{ translate( 'Street address' ) }</FormLabel>
-					<FormTextInput name="street" onChange={ onChange } value={ street } />
+					<FormTextInput
+						autoComplete="address-line1"
+						name="street"
+						onChange={ onChange }
+						value={ street }
+					/>
 				</FormFieldSet>
 				{ this.renderEditableAddressLine2() }
 				<div className="address-view__editable-city-state-postcode">
 					<FormFieldSet>
 						<FormLabel>{ translate( 'City' ) }</FormLabel>
-						<FormTextInput name="city" onChange={ onChange } value={ city } />
+						<FormTextInput
+							autoComplete="address-level2"
+							name="city"
+							onChange={ onChange }
+							value={ city }
+						/>
 					</FormFieldSet>
 					{ this.renderEditableState() }
 					<FormFieldSet>
 						<FormLabel>{ translate( 'Postal code' ) }</FormLabel>
-						<FormTextInput name="postcode" onChange={ onChange } value={ postcode } />
+						<FormTextInput
+							autoComplete="postal-code"
+							name="postcode"
+							onChange={ onChange }
+							value={ postcode }
+						/>
 					</FormFieldSet>
 				</div>
 				{ this.renderEditableCountry() }
