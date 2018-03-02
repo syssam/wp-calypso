@@ -130,7 +130,7 @@ class StoreAddress extends Component {
 	};
 
 	render() {
-		const { className, siteId, loaded, fetchError, translate, showLabel } = this.props;
+		const { className, countries, siteId, loaded, fetchError, translate, showLabel } = this.props;
 
 		const buttons = [
 			{ action: 'close', label: translate( 'Close' ) },
@@ -151,7 +151,7 @@ class StoreAddress extends Component {
 			display = (
 				<div>
 					{ showLabel && <FormLabel>{ translate( 'Store location' ) }</FormLabel> }
-					<AddressView address={ this.state.address } />
+					<AddressView address={ this.state.address } countries={ countries } />
 					<Button compact onClick={ this.onShowDialog }>
 						{ translate( 'Edit address' ) }
 					</Button>
@@ -173,7 +173,12 @@ class StoreAddress extends Component {
 					onClose={ this.onCloseDialog }
 					additionalClassNames="woocommerce store-location__edit-dialog"
 				>
-					<AddressView address={ this.state.addressEdits } isEditable onChange={ this.onChange } />
+					<AddressView
+						address={ this.state.addressEdits }
+						countries={ countries }
+						isEditable
+						onChange={ this.onChange }
+					/>
 				</Dialog>
 				{ display }
 			</Card>

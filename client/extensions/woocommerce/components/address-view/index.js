@@ -202,7 +202,8 @@ class AddressView extends Component {
 
 		const { address, countries } = this.props;
 		const { name, country } = address;
-		const countryName = find( countries, { country } ) || '';
+		const countryData = find( countries, { code: country } );
+		const countryName = countryData ? countryData.name : false;
 
 		return (
 			<div className="address-view__fields-static">
