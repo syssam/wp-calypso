@@ -1,7 +1,22 @@
 /** @format */
+/**
+ * External dependencies
+ */
+import { omit, map } from 'lodash';
+
 export function keyForPost( post ) {
 	if ( ! post ) {
 		return;
+	}
+
+	// hack for conversations
+	// postKeys have attached commentIds
+	// that decide which are the latest comments that should be pre-opened
+	if ( post.comments ) {
+		return {
+			...keyForPost( omit( post, 'comments' ) ),
+			comments: map( post.comments, 'ID' ),
+		};
 	}
 
 	if ( post.feed_ID && post.feed_item_ID ) {

@@ -28,7 +28,7 @@ class SiteStream extends React.Component {
 		className: PropTypes.string,
 		showBack: PropTypes.bool,
 		isDiscoverStream: PropTypes.bool,
-		featuredStore: PropTypes.object,
+		featuredStreamKey: PropTypes.string,
 	};
 
 	static defaultProps = {
@@ -44,7 +44,7 @@ class SiteStream extends React.Component {
 	};
 
 	render() {
-		const { site, feed, featuredStore } = this.props;
+		const { site, feed, featuredStreamKey } = this.props;
 		// check for redirect
 		if ( site && site.prefer_feed && site.feed_ID ) {
 			page.replace( '/read/feeds/' + site.feed_ID );
@@ -57,7 +57,7 @@ class SiteStream extends React.Component {
 			return <FeedError sidebarTitle={ title } />;
 		}
 
-		const featuredContent = featuredStore && <FeedFeatured postsStore={ featuredStore } />;
+		const featuredContent = featuredStreamKey && <FeedFeatured streamKey={ featuredStreamKey } />;
 
 		return (
 			<Stream

@@ -6,7 +6,7 @@ import ReactDom from 'react-dom';
 import PropTypes from 'prop-types';
 import React from 'react';
 import classnames from 'classnames';
-import { defer, findLast, noop, times, clamp, identity, map } from 'lodash';
+import { findLast, noop, times, clamp, identity } from 'lodash';
 import { connect } from 'react-redux';
 import { localize } from 'i18n-calypso';
 
@@ -17,7 +17,6 @@ import ReaderMain from 'components/reader-main';
 import EmptyContent from './empty';
 import {
 	requestPage,
-	selectFirstItem,
 	selectItem,
 	selectNextItem,
 	selectPrevItem,

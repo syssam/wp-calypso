@@ -3,8 +3,9 @@
 /**
  * External dependencies
  */
-import { random, pickBy } from 'lodash';
+import { random } from 'lodash';
 import { translate } from 'i18n-calypso';
+import querystring from 'querystring';
 
 /**
  * Internal dependencies
@@ -43,22 +44,24 @@ function getSeedForQuery() {
 	return random( 0, 10000 );
 }
 
-export const getQueryString = ( { metaExtras } = {} ) => ( extras = {} ) => {
+export const getQueryString = ( { metaExtras, extras0 } = {} ) => ( extras = {} ) => {
 	const meta = `post,discover_original_post${ !! metaExtras ? ',' + metaExtras : '' }`;
-	return { orderBy: 'date', meta, ...extras };
+	return { orderBy: 'date', meta, ...extras, ...extras0 };
 };
+const defaultQueryFn = getQueryString();
+
 // Each object is a composed of:
 //   path: a function that given the action, returns The API path to hit
 //   query: a function that given the action, returns the querystring to use.
 const streamApis = {
 	following: {
 		path: () => '/read/following',
-		query: getQueryString(),
 	},
 	search: {
 		path: () => '/read/search',
-		query: ( { query, streamKey } ) => {
-			return { ...query, q: streamKeySuffix( streamKey ) };
+		query: ( pageHandle, { streamKey } ) => {
+			const { sort, q } = JSON.parse( streamKeySuffix( streamKey ) );
+			return { orderBy: sort, q, ...pageHandle };
 		},
 	},
 	feed: {
@@ -76,9 +79,9 @@ const streamApis = {
 	a8c: {
 		path: () => '/read/a8c',
 	},
-	a8c_conversations: {
+	'conversations-a8c': {
 		path: () => '/read/conversations',
-		query: () => ( { index: 'a8c' } ),
+		query: getQueryString( { extras0: { index: 'a8c' } } ),
 	},
 	likes: {
 		path: () => '/read/liked',
@@ -96,17 +99,21 @@ const streamApis = {
 	custom_recs_posts_with_images: {
 		path: () => '/read/recommendations/posts',
 		query: ( { query } ) => {
-			return Object.assign( {}, query, {
+			return {
+				...query,
 				seed: getSeedForQuery(),
 				algorithm: 'read:recommendations:posts/es/7',
-			} );
+			};
 		},
 	},
 	tag: {
 		path: () => '/read/tags/:tag/posts',
 	},
 	list: {
-		path: () => '/read/list/:owner/:slug/posts',
+		path: ( { streamKey } ) => {
+			const { owner, slug } = JSON.parse( streamKeySuffix( streamKey ) );
+			return `/read/list/${ owner }/${ slug }/posts`;
+		},
 	},
 };
 
@@ -124,13 +131,13 @@ export function requestPage( action ) {
 		return;
 	}
 
-	const { apiVersion = '1.2', path, query } = api;
+	const { apiVersion = '1.2', path, query = defaultQueryFn } = api;
 
 	return http( {
 		method: 'GET',
 		path: path( { ...action.payload } ),
 		apiVersion,
-		query: query ? query( { ...pageHandle } ) : {},
+		query: query( { ...pageHandle }, action.payload ),
 		onSuccess: action,
 		onFailure: action,
 	} );
@@ -147,10 +154,26 @@ export function fromApi( data ) {
 }
 
 export function handlePage( action, data ) {
-	const { posts, date_range } = data;
+	const { posts, date_range, meta, next_page } = data;
 	const { streamKey, query } = action.payload;
-	const { before } = date_range;
-	const pageHandle = { before };
+	let pageHandle = {};
+
+	if ( meta && meta.next_page ) {
+		// sites give pange handles nested within the meta key
+		pageHandle = { page_handle: next_page || meta.next_page };
+	} else if ( next_page ) {
+		// search api returns next_page as top-level.
+		// but weirdly it returns the next querystring necessary
+		// so this code breaks it down into an object
+		// to be re-stringified later.
+		// TODO: stop doing this extra work
+		pageHandle = querystring.parse( next_page );
+	} else if ( date_range ) {
+		// feeds use date_range. no next_page handles here
+		const { before } = date_range;
+		pageHandle = { before };
+	}
+
 	return [ receivePosts( posts ), receivePage( { streamKey, query, posts, pageHandle } ) ];
 }
 
