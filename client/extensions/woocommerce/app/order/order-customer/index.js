@@ -15,7 +15,9 @@ import AddressView from 'woocommerce/components/address-view';
 import Button from 'components/button';
 import Card from 'components/card';
 import CustomerAddressDialog from './dialog';
+import { areLocationsLoaded, getAllCountries } from 'woocommerce/state/sites/locations/selectors';
 import { editOrder } from 'woocommerce/state/ui/orders/actions';
+import { fetchLocations } from 'woocommerce/state/sites/locations/actions';
 import { isCurrentlyEditingOrder, getOrderWithEdits } from 'woocommerce/state/ui/orders/selectors';
 import { isOrderFinished } from 'woocommerce/lib/order-status';
 import getAddressViewFormat from 'woocommerce/lib/get-address-view-format';
@@ -40,6 +42,22 @@ class OrderCustomerInfo extends Component {
 
 	state = {
 		showDialog: false,
+	};
+
+	maybeFetchLocations = () => {
+		const { loadedLocations, siteId } = this.props;
+
+		if ( siteId && ! loadedLocations ) {
+			this.props.fetchLocations( siteId );
+		}
+	};
+
+	componentDidMount = () => {
+		this.maybeFetchLocations( this.props );
+	};
+
+	componentDidUpdate = () => {
+		this.maybeFetchLocations( this.props );
 	};
 
 	updateAddress = ( type = 'billing' ) => {
@@ -86,8 +104,8 @@ class OrderCustomerInfo extends Component {
 	};
 
 	render() {
-		const { isEditing, order, translate } = this.props;
-		if ( ! order ) {
+		const { countries, isEditing, loadedLocations, order, translate } = this.props;
+		if ( ! order || ! loadedLocations ) {
 			return null;
 		}
 
@@ -116,7 +134,7 @@ class OrderCustomerInfo extends Component {
 							<h4>{ translate( 'Address' ) }</h4>
 							<div className="order-customer__billing-address">
 								<p>{ `${ billing.first_name } ${ billing.last_name }` }</p>
-								<AddressView address={ getAddressViewFormat( billing ) } />
+								<AddressView address={ getAddressViewFormat( billing ) } countries={ countries } />
 							</div>
 
 							<h4>{ translate( 'Email' ) }</h4>
@@ -143,7 +161,7 @@ class OrderCustomerInfo extends Component {
 							<h4>{ translate( 'Address' ) }</h4>
 							<div className="order-customer__shipping-address">
 								<p>{ `${ shipping.first_name } ${ shipping.last_name }` }</p>
-								<AddressView address={ getAddressViewFormat( shipping ) } />
+								<AddressView address={ getAddressViewFormat( shipping ) } countries={ countries } />
 							</div>
 						</div>
 					</div>
@@ -160,11 +178,16 @@ export default connect(
 		const isEditing = isCurrentlyEditingOrder( state );
 		const order = isEditing ? getOrderWithEdits( state ) : getOrder( state, props.orderId );
 
+		const loadedLocations = areLocationsLoaded( state, siteId );
+		const countries = getAllCountries( state, siteId );
+
 		return {
+			countries,
 			isEditing,
+			loadedLocations,
 			order,
 			siteId,
 		};
 	},
-	dispatch => bindActionCreators( { editOrder }, dispatch )
+	dispatch => bindActionCreators( { editOrder, fetchLocations }, dispatch )
 )( localize( OrderCustomerInfo ) );
