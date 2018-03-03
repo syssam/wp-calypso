@@ -1,12 +1,12 @@
 # Accessibility
 
-We need calypso to be accessible to all our users. According to surveys done by WebAIM,
+We need Calypso to be accessible to all our users. According to surveys done by WebAIM,
 
 - 97.6% of screen reader users… [(2014)](http://webaim.org/projects/screenreadersurvey5/#javascript)
 - 99.5% of users with low vision… [(2013)](http://webaim.org/projects/lowvisionsurvey/#javascript)
 - 100% of users with motor disabilities… [(2013)](http://webaim.org/projects/motordisabilitysurvey/#javascript)
 
-… use the internet with javascript enabled. These users can use Calypso if we make sure it's accessible and works with assistive technology.
+… use the internet with JavaScript enabled. These users can use Calypso if we make sure it's accessible and works with assistive technology.
 
 For us, accessible means:
 
@@ -22,11 +22,11 @@ For us, accessible means:
 
 — (paraphrased from the [WCAG 2.0 Overview](https://www.w3.org/WAI/WCAG20/glance/Overview))
 
-For a detailed list of requirements, you can go to [the WCAG 2.0 customized quickref](https://www.w3.org/WAI/WCAG20/quickref/?currentsidebar=%23col_customize&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl). There are 3 levels of criteria for each guideline, A (lowest), AA, and AAA (highest). For Calypso, we aim for WCAG 2.0 Level AA (which also includes level A). This is generally an agreed-on standard for compliance with equal access laws.
+For a detailed list of requirements, you can go to [the WCAG 2.0 customized quickref](https://www.w3.org/WAI/WCAG20/quickref/?currentsidebar=%23col_customize&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl). There are 3 levels of criteria for each guideline, A (lowest), AA, and AAA (highest). For Calypso, we aim for WCAG 2.0 Level AA (which also includes level A). This is generally an agreed-upon standard for compliance with equal access laws.
 
 ## Automated Testing/Checking
 
-Our eslint rules (will) have some accessibility checking built in.
+Our ESLint rules include some basic accessibility checks using the [jsx-a11y plugin](https://github.com/evcohen/eslint-plugin-jsx-a11y).
 
 ## Resources
 
@@ -65,18 +65,19 @@ Find tools that will help you bring accessibility into your workflow.
 
 ### Web Developers
 
-* [Wave](http://wave.webaim.org/): A web tool and Firefox add-on for evaluating the accessibility of web pages.
+* [aXe](https://www.deque.com/products/axe/): A browser add-on for evaluating the accessibility of web pages within the developer console.
+* [Wave](http://wave.webaim.org/): A web tool and browser add-on for evaluating the accessibility of web pages.
 * [NVDA](http://www.nvda-project.org/): A screenreader for Windows (open source).
-* [JAWS](http://www.freedomscientific.com/products/fs/jaws-product-page.asp): The most popular screenreader. Available for Windows and cost money.
+* [JAWS](http://www.freedomscientific.com/products/fs/jaws-product-page.asp): The most popular screenreader. Available for Windows; costs money.
 * [VoiceOver](http://www.apple.com/accessibility/voiceover/): Built-in screenreader for Mac.
-* [VoiceOver for iOS](http://www.apple.com/accessibility/iphone/vision.html): Built-in screenreader for Mac.
+* [VoiceOver for iOS](http://www.apple.com/accessibility/iphone/vision.html): Built-in screenreader for iOS.
 * [Chrome Vox](http://www.chromevox.com/): A screenreader for ChromeOS.
 * [WCAG 2.0 Cheat Sheet](http://www.w3.org/2009/cheatsheet/#wcag2) A simplified look at WCAG 2.0.
 * [WCAG 2.0 Mind Map](http://stamfordinteractive.com.au/wp-content/uploads/2013/03/WCAG20Map.pdf): A clickable mind-map that helps put the web accessibility guidelines into perspective. This WCAG 2.0-on-a-single-page reference is an alternative way to view the guidelines.
-* [An Alt Text Decision Tree](http://dev.w3.org/html5/alt-techniques/developer.html#tree): A decision tree for deciding when and how to implement alt text in your work on the web. This is a work in progress by the editors of the HTML5 spec, but its extremely useful in its current form.
+* [An Alt Text Decision Tree](http://dev.w3.org/html5/alt-techniques/developer.html#tree): A decision tree for deciding when and how to implement alt text in your work on the web. This is a work in progress by the editors of the HTML5 spec, but it's extremely useful in its current form.
 
 ## Utilities in Calypso
 
-As we work to make calypso more accessible, we'll probably add more things here.
+As we work to make Calypso more accessible, we'll probably add more things here.
 
 * [accessible-focus](client/lib/accessible-focus/README.md): A small module which is run at client startup and adds an `accessible-focus` class to the document's html element when keyboard navigation is detected, so that obvious focus styles can be added without being distracting for non-keyboard users.
