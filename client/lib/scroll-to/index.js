@@ -77,4 +77,5 @@ export default function scrollTo( options ) {
 	} else {
 		tween.start();
 	}
+	return tween;
 }

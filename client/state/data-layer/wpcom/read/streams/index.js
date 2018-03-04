@@ -170,8 +170,8 @@ export function handlePage( action, data ) {
 		pageHandle = querystring.parse( next_page );
 	} else if ( date_range ) {
 		// feeds use date_range. no next_page handles here
-		const { before } = date_range;
-		pageHandle = { before };
+		const { after } = date_range;
+		pageHandle = { before: after };
 	}
 
 	return [ receivePosts( posts ), receivePage( { streamKey, query, posts, pageHandle } ) ];

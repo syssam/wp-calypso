@@ -13,7 +13,7 @@ import { connect } from 'react-redux';
  */
 import { fetchPost } from 'state/reader/posts/actions';
 import { getPostByKey } from 'state/reader/posts/selectors';
-import { isPostKeyLike } from 'lib/feed-stream-store/post-key';
+import { isPostKeyLike } from 'state/reader/streams/post-key';
 
 class QueryReaderPost extends Component {
 	static propTypes = {

@@ -6,7 +6,7 @@ import ReactDom from 'react-dom';
 import PropTypes from 'prop-types';
 import React from 'react';
 import classnames from 'classnames';
-import { findLast, noop, times, clamp, identity } from 'lodash';
+import { findLast, noop, times } from 'lodash';
 import { connect } from 'react-redux';
 import { localize } from 'i18n-calypso';
 
@@ -23,7 +23,11 @@ import {
 	showUpdates,
 	// shufflePosts,
 } from 'state/reader/streams/actions';
-import { getStream } from 'state/reader/streams/selectors';
+import {
+	getStream,
+	getTransformedStreamItems,
+	shouldRequestRecs,
+} from 'state/reader/streams/selectors';
 import LikeStore from 'lib/like-store/like-store';
 import { likePost, unlikePost } from 'lib/like-store/actions';
 import LikeHelper from 'reader/like-helper';
@@ -38,43 +42,16 @@ import XPostHelper from 'reader/xpost-helper';
 import PostLifecycle from './post-lifecycle';
 import { showSelectedPost } from 'reader/utils';
 import getBlockedSites from 'state/selectors/get-blocked-sites';
-import { getReaderFollows } from 'state/selectors';
-import { keysAreEqual, keyToString, keyForPost } from 'lib/feed-stream-store/post-key';
+import { keysAreEqual, keyToString, keyForPost } from 'state/reader/streams/post-key';
 import { resetCardExpansions } from 'state/ui/reader/card-expansions/actions';
-import { combineCards, injectRecommendations, RECS_PER_BLOCK } from './utils';
-import { reduxGetState } from 'lib/redux-bridge';
 import { getPostByKey } from 'state/reader/posts/selectors';
 import { viewStream } from 'state/reader/watermarks/actions';
 
 const GUESSED_POST_HEIGHT = 600;
 const HEADER_OFFSET_TOP = 46;
 
-const MIN_DISTANCE_BETWEEN_RECS = 4; // page size is 7, so one in the middle of every page and one on page boundries, sometimes
-const MAX_DISTANCE_BETWEEN_RECS = 30;
-
-function getDistanceBetweenRecs( totalSubs ) {
-	// the distance between recs changes based on how many subscriptions the user has.
-	// We cap it at MAX_DISTANCE_BETWEEN_RECS.
-	// It grows at the natural log of the number of subs, times a multiplier, offset by a constant.
-	// This lets the distance between recs grow quickly as you add subs early on, and slow down as you
-	// become a common user of the reader.
-	if ( totalSubs <= 0 ) {
-		// 0 means either we don't know yet, or the user actually has zero subs.
-		// if a user has zero subs, we don't show posts at all, so just treat 0 as 'unknown' and
-		// push recs to the max.
-		return MAX_DISTANCE_BETWEEN_RECS;
-	}
-	const distance = clamp(
-		Math.floor( Math.log( totalSubs ) * Math.LOG2E * 5 - 6 ),
-		MIN_DISTANCE_BETWEEN_RECS,
-		MAX_DISTANCE_BETWEEN_RECS
-	);
-	return distance;
-}
-
 class ReaderStream extends React.Component {
 	static propTypes = {
-		recommendationsStore: PropTypes.object,
 		trackScrollPage: PropTypes.func.isRequired,
 		suppressSiteNameLink: PropTypes.bool,
 		showPostHeader: PropTypes.bool,
@@ -90,10 +67,10 @@ class ReaderStream extends React.Component {
 		isDiscoverStream: PropTypes.bool,
 		shouldCombineCards: PropTypes.bool,
 		useCompactCards: PropTypes.bool,
-		transformStreamItems: PropTypes.func,
 		isMain: PropTypes.bool,
 		intro: PropTypes.object,
 		forcePlaceholders: PropTypes.bool,
+		recsStreamKey: PropTypes.string,
 	};
 
 	static defaultProps = {
@@ -107,39 +84,21 @@ class ReaderStream extends React.Component {
 		showMobileBackToSidebar: true,
 		isDiscoverStream: false,
 		shouldCombineCards: true,
-		transformStreamItems: identity,
 		isMain: true,
 		useCompactCards: false,
 		intro: null,
 		forcePlaceholders: false,
 	};
 
-	getStateFromStores() {
-		// const posts = map( store.get(), props.transformStreamItems );
-		// const recs = recommendationsStore ? recommendationsStore.get() : null;
-		// // do we have enough recs? if we have a store, but not enough recs, we should fetch some more...
-		// if ( recommendationsStore ) {
-		// 	if (
-		// 		! recs ||
-		// 		recs.length < posts.length * ( RECS_PER_BLOCK / getDistanceBetweenRecs( totalSubs ) )
-		// 	) {
-		// 		if ( ! recommendationsStore.isFetchingNextPage() ) {
-		// 			defer( () => fetchNextPage( recommendationsStore.id ) );
-		// 		}
-		// 	}
-		// }
-		// let items = this.state && this.state.items;
-		// if ( ! this.state || posts !== this.state.posts || recs !== this.state.recs ) {
-		// 	items = injectRecommendations( posts, recs, getDistanceBetweenRecs( totalSubs ) );
-		// }
-		// if ( props.shouldCombineCards ) {
-		// 	items = combineCards( items );
-		// }
-	}
-
 	componentDidUpdate( { selectedPostKey } ) {
 		if ( ! keysAreEqual( selectedPostKey, this.props.selectedPostKey ) ) {
 			this.scrollToSelectedPost( true );
+		}
+		if ( this.props.shouldRequestRecs ) {
+			this.props.requestPage( {
+				streamKey: this.props.recsStreamKey,
+				pageHandle: this.props.recsStream.pageHandle,
+			} );
 		}
 	}
 
@@ -150,6 +109,10 @@ class ReaderStream extends React.Component {
 	};
 
 	scrollToSelectedPost( animate ) {
+		if ( this.animation ) {
+			this.animation.stop();
+			this.animation = undefined;
+		}
 		const HEADER_OFFSET = -80; // a fixed position header means we can't just scroll the element into view.
 		const selectedNode = ReactDom.findDOMNode( this ).querySelector( '.is-selected' );
 		if ( selectedNode ) {
@@ -160,7 +123,7 @@ class ReaderStream extends React.Component {
 			const boundingClientRect = selectedNode.getBoundingClientRect();
 			const scrollY = parseInt( windowTop + boundingClientRect.top + HEADER_OFFSET, 10 );
 			if ( animate ) {
-				scrollTo( {
+				this.animation = scrollTo( {
 					x: 0,
 					y: scrollY,
 					duration: 200,
@@ -173,8 +136,6 @@ class ReaderStream extends React.Component {
 
 	componentDidMount() {
 		const { streamKey } = this.props;
-		this.props.recommendationsStore &&
-			this.props.recommendationsStore.on( 'change', this.updateState );
 		this.props.resetCardExpansions();
 		this.props.viewStream( { streamKey } );
 
@@ -190,9 +151,6 @@ class ReaderStream extends React.Component {
 	}
 
 	componentWillUnmount() {
-		this.props.recommendationsStore &&
-			this.props.recommendationsStore.off( 'change', this.updateState );
-
 		KeyboardShortcuts.off( 'move-selection-down', this.selectNextItem );
 		KeyboardShortcuts.off( 'move-selection-up', this.selectPrevItem );
 		KeyboardShortcuts.off( 'open-selection', this.handleOpenSelection );
@@ -220,12 +178,7 @@ class ReaderStream extends React.Component {
 	};
 
 	toggleLikeOnSelectedPost = () => {
-		const { selectedPostKey: postKey } = this.props;
-		let post;
-
-		if ( postKey && ! postKey.isGap ) {
-			post = getPostByKey( reduxGetState(), postKey );
-		}
+		const { selectedPost: post } = this.props;
 
 		// only toggle a like on a x-post if we have the appropriate metadata,
 		// and original post is full screen
@@ -264,7 +217,10 @@ class ReaderStream extends React.Component {
 	}
 
 	selectNextItem = () => {
-		const { streamKey, items, posts } = this.props;
+		// note that we grab the items directly from the stream because we don't want the transformed
+		// one with combined cards
+		const { streamKey, stream: { items } } = this.props;
+
 		// do we have a selected item? if so, just move to the next one
 		if ( this.props.selectedPostKey ) {
 			this.props.selectNextItem( { streamKey, items } );
@@ -299,20 +255,19 @@ class ReaderStream extends React.Component {
 			// is this a combo card?
 			if ( candidateItem.isCombination ) {
 				// pick the first item
-				const postKey = { postId: candidateItem.postIds[ 0 ] };
-				if ( candidateItem.feedId ) {
-					postKey.feedId = candidateItem.feedId;
-				} else {
-					postKey.blogId = candidateItem.blogId;
-				}
+				const postKey = {
+					postId: candidateItem.postIds[ 0 ],
+					feedId: candidateItem.feedId,
+					blogId: candidateItem.blogId,
+				};
 				this.props.selectItem( { streamKey, postKey } );
 			}
 
-			// find the index of the post / gap in the posts array.
+			// find the index of the post / gap in the items array.
 			// Start the search from the index in the items array, which has to be equal to or larger than
-			// the index in the posts array.
+			// the index in the items array.
 			// Use lastIndexOf to walk the array from right to left
-			const selectedPostKey = findLast( posts, items[ index ], index );
+			const selectedPostKey = findLast( items, items[ index ], index );
 			if ( keysAreEqual( selectedPostKey, this.props.selectedPostKey ) ) {
 				this.props.selectNextItem( { streamKey, items } );
 			} else {
@@ -322,7 +277,9 @@ class ReaderStream extends React.Component {
 	};
 
 	selectPrevItem = () => {
-		const { streamKey, selectedPostKey, items } = this.props;
+		// note that we grab the items directly from the stream because we don't want the transformed
+		// one with combined cards
+		const { streamKey, selectedPostKey, stream: { items } } = this.props;
 		// unlike selectNextItem, we don't want any magic here. Just move back an item if the user
 		// currently has a selected item. Otherwise do nothing.
 		// We avoid the magic here because we expect users to enter the flow using next, not previous.
@@ -354,8 +311,8 @@ class ReaderStream extends React.Component {
 	};
 
 	renderLoadingPlaceholders = () => {
-		const { posts } = this.props;
-		const count = posts.length ? 2 : 4; // @TODO: figure out what numbers should go here and make sensible const
+		const { items } = this.props;
+		const count = items.length ? 2 : 4; // @TODO: figure out what numbers should go here and make sensible const
 
 		return times( count, i => {
 			if ( this.props.placeholderFactory ) {
@@ -371,12 +328,7 @@ class ReaderStream extends React.Component {
 
 	renderPost = ( postKey, index ) => {
 		const { selectedPostKey, streamKey } = this.props;
-		// const recStoreId = this.props.recommendationsStore && this.props.recommendationsStore.id;
-		const isSelected = !! (
-			selectedPostKey &&
-			selectedPostKey.postId === postKey.postId &&
-			( selectedPostKey.blogId === postKey.blogId || selectedPostKey.feedId === postKey.feedId )
-		);
+		const isSelected = !! ( selectedPostKey && keysAreEqual( selectedPostKey, postKey ) );
 
 		const itemKey = this.getPostRef( postKey );
 		const showPost = args =>
@@ -399,21 +351,21 @@ class ReaderStream extends React.Component {
 				showPrimaryFollowButtonOnCards={ this.props.showPrimaryFollowButtonOnCards }
 				isDiscoverStream={ this.props.isDiscoverStream }
 				showSiteName={ this.props.showSiteNameOnCards }
+				selectedPostKey={ postKey.isCombination ? selectedPostKey : undefined }
 				followSource={ this.props.followSource }
 				blockedSites={ this.props.blockedSites }
+				recsStreamKey={ this.props.recsStreamKey }
 				index={ index }
-				selectedPostKey={ selectedPostKey }
-				// recStoreId={ recStoreId }
 				compact={ this.props.useCompactCards }
 			/>
 		);
 	};
 
 	render() {
-		const { forcePlaceholders, posts, pendingItems, updateCount, lastPage } = this.props;
+		const { forcePlaceholders, pendingItems, updateCount, lastPage } = this.props;
 		let { items, isRequesting } = this.props;
 
-		const hasNoPosts = false && posts.length === 0;
+		const hasNoPosts = false && items.length === 0;
 		let body, showingStream;
 
 		// trick an infinite list to showing placeholders
@@ -462,37 +414,44 @@ class ReaderStream extends React.Component {
 					pendingPostKeys={ pendingItems }
 				/>
 				{ this.props.children }
-				{ showingStream && posts.length ? this.props.intro : null }
+				{ showingStream && items.length ? this.props.intro : null }
 				{ body }
-				{ showingStream && false /*TODO: make work */ && posts.length && <ListEnd /> }
+				{ showingStream && false /*TODO: make work */ && items.length && <ListEnd /> }
 			</TopLevel>
 		);
 	}
 }
 
-export default localize(
-	connect(
-		( state, { streamKey } ) => ( {
+export default connect(
+	( state, { streamKey, recsStreamKey, shouldCombineCards = true } ) => {
+		const stream = getStream( state, streamKey );
+
+		return {
 			blockedSites: getBlockedSites( state ),
-			totalSubs: getReaderFollows( state ).length,
-			stream: getStream( state, streamKey ),
-			items: getStream( state, streamKey ).items,
-			posts: getStream( state, streamKey ).items,
-			pendingItems: getStream( state, streamKey ).pendingItems,
-			updateCount: getStream( state, streamKey ).pendingItems.length,
-			selectedPostKey: getStream( state, streamKey ).selected,
-			lastPage: getStream( state, streamKey ).lastPage,
-			isRequesting: getStream( state, streamKey ).isRequesting,
-		} ),
-		{
-			resetCardExpansions,
-			requestPage,
-			selectItem,
-			selectNextItem,
-			selectPrevItem,
-			showUpdates,
-			viewStream,
-			// shufflePosts,
-		}
-	)( ReaderStream )
-);
+			items: getTransformedStreamItems( state, {
+				streamKey,
+				recsStreamKey,
+				shouldCombine: shouldCombineCards,
+			} ),
+			stream,
+			recsStream: getStream( state, recsStreamKey ),
+			pendingItems: stream.pendingItems,
+			updateCount: stream.pendingItems.length,
+			selectedPostKey: stream.selected,
+			selectedPost: getPostByKey( state, stream.selected ),
+			lastPage: stream.lastPage,
+			isRequesting: stream.isRequesting,
+			shouldRequestRecs: shouldRequestRecs( state, streamKey, recsStreamKey ),
+		};
+	},
+	{
+		resetCardExpansions,
+		requestPage,
+		selectItem,
+		selectNextItem,
+		selectPrevItem,
+		showUpdates,
+		viewStream,
+		// shufflePosts,
+	}
+)( localize( ReaderStream ) );

@@ -3,11 +3,19 @@
  * External dependencies
  */
 import { findIndex } from 'lodash';
+import treeSelect from 'lib/tree-select';
 
 /**
  * Internal dependencies
  */
-import { keysAreEqual, keyToString } from './post-key';
+import { keysAreEqual } from './post-key';
+import {
+	injectRecommendations,
+	getDistanceBetweenRecs,
+	combineCards,
+	RECS_PER_BLOCK,
+} from 'reader/stream/utils';
+import { getReaderFollows } from 'state/selectors';
 
 const emptyStream = { items: [], pendingItems: [], lastPage: false, isRequesting: false };
 /**
@@ -42,3 +50,40 @@ function getOffsetItem( state, currentItem, offset ) {
 
 export const getNextItem = ( state, currentItem ) => getOffsetItem( state, currentItem, 1 );
 export const getPreviousItem = ( state, currentItem ) => getOffsetItem( state, currentItem, -1 );
+
+export const getTransformedStreamItems = treeSelect(
+	( state, { streamKey, recsStreamKey } ) => [
+		getStream( state, streamKey ).items,
+		getStream( state, recsStreamKey ).items,
+		getReaderFollows( state ),
+	],
+	( [ items, recs, follows ], { shouldCombine } ) => {
+		if ( items.length === 0 ) {
+			return [];
+		}
+
+		if ( recs.length > 0 ) {
+			items = injectRecommendations( items, recs, getDistanceBetweenRecs( follows.length ) );
+		}
+		if ( shouldCombine ) {
+			items = combineCards( items );
+		}
+		return items;
+	},
+	{
+		getCacheKey: ( { streamKey, recsStreamKey, shouldCombine } ) =>
+			`${ streamKey }${ recsStreamKey }${ shouldCombine }`,
+	}
+);
+
+export function shouldRequestRecs( state, streamKey, recsStreamKey ) {
+	if ( ! recsStreamKey ) {
+		return false;
+	}
+	const totalSubs = getReaderFollows( state ).length;
+	const items = getStream( state, streamKey ).items;
+	const recs = getStream( state, recsStreamKey ).items;
+
+	// do we have enough recs? if we have a store, but not enough recs, we should fetch some more...
+	return recs.length < items.length * ( RECS_PER_BLOCK / getDistanceBetweenRecs( totalSubs ) );
+}
