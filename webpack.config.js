@@ -110,14 +110,14 @@ const webpackConfig = {
 		noParse: /[\/\\]node_modules[\/\\]localforage[\/\\]dist[\/\\]localforage\.js$/,
 		rules: [
 			{
+				type: 'javascript/auto',
 				test: /\.jsx?$/,
 				exclude: /node_modules[\/\\](?!notifications-panel)/,
 				use: _.compact( [
 					{
-						loader:'thread-loader',
-						options: { workers: 3 }
+						loader: 'thread-loader',
+						options: { workers: 3 },
 					},
-					isDevelopment && 'react-hot-loader',
 					babelLoader,
 				] ),
 			},
@@ -226,10 +226,7 @@ if ( isDevelopment ) {
 		new webpack.HotModuleReplacementPlugin(),
 		new webpack.LoaderOptionsPlugin( { debug: true } ),
 	] );
-	webpackConfig.entry.build = [
-		'webpack-hot-middleware/client',
-		path.join( __dirname, 'client', 'boot', 'app' ),
-	];
+	webpackConfig.entry.build = [ path.join( __dirname, 'client', 'boot', 'app' ) ];
 	webpackConfig.devServer = { hot: true, inline: true };
 } else {
 	webpackConfig.entry.build = path.join( __dirname, 'client', 'boot', 'app' );
