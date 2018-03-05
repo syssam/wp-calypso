@@ -96,6 +96,7 @@ const babelLoader = {
 const webpackConfig = {
 	bail: ! isDevelopment,
 	entry: {},
+	mode: bundleEnv,
 	devtool: isDevelopment ? '#eval' : process.env.SOURCEMAP || false, // in production builds you can specify a source-map via env var
 	output: {
 		path: path.join( __dirname, 'public' ),

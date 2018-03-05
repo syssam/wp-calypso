@@ -85,6 +85,7 @@ function middleware( app ) {
 	app.use( waitForCompiler );
 	app.use(
 		webpackMiddleware( compiler, {
+			mode: 'development',
 			publicPath: '/calypso/',
 			stats: {
 				colors: true,
