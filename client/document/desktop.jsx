@@ -24,7 +24,7 @@ class Desktop extends React.Component {
 			lang,
 			urls,
 			hasSecondary,
-			config,
+			ssrConfig,
 			isFluidWidth,
 			env,
 			isDebug,
@@ -103,11 +103,11 @@ class Desktop extends React.Component {
 							} }
 						/>
 					) }
-					{ config && (
+					{ ssrConfig && (
 						<script
 							type="text/javascript"
 							dangerouslySetInnerHTML={ {
-								__html: config,
+								__html: ssrConfig,
 							} }
 						/>
 					) }
