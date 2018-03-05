@@ -6,7 +6,7 @@ import ReactDom from 'react-dom';
 import PropTypes from 'prop-types';
 import React from 'react';
 import classnames from 'classnames';
-import { findLast, noop, times } from 'lodash';
+import { findLast, noop, times, includes } from 'lodash';
 import { connect } from 'react-redux';
 import { localize } from 'i18n-calypso';
 
@@ -97,7 +97,7 @@ class ReaderStream extends React.Component {
 		if ( this.props.shouldRequestRecs ) {
 			this.props.requestPage( {
 				streamKey: this.props.recsStreamKey,
-				pageHandle: this.props.recsStream.pageHandle,
+				pageHandle: { offset: this.props.recsStream.items.length }, // @todo: move setting of pageHandle to data-layer
 			} );
 		}
 	}
@@ -289,13 +289,15 @@ class ReaderStream extends React.Component {
 	};
 
 	fetchNextPage = options => {
+		const { streamKey, stream } = this.props;
 		if ( options.triggeredByScroll ) {
 			// this.props.trackScrollPage( this.props.postsStore.getPage() + 1 );
 		}
-		this.props.requestPage( {
-			streamKey: this.props.streamKey,
-			pageHandle: this.props.stream.pageHandle,
-		} );
+
+		const pageHandle = includes( streamKey, 'rec' ) // recs api requires offsets
+			? { offset: stream.items.length }
+			: stream.pageHandle;
+		this.props.requestPage( { streamKey, pageHandle } );
 	};
 
 	showUpdates = () => {
@@ -354,6 +356,7 @@ class ReaderStream extends React.Component {
 				selectedPostKey={ postKey.isCombination ? selectedPostKey : undefined }
 				followSource={ this.props.followSource }
 				blockedSites={ this.props.blockedSites }
+				streamKey={ streamKey }
 				recsStreamKey={ this.props.recsStreamKey }
 				index={ index }
 				compact={ this.props.useCompactCards }

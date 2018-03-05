@@ -41,7 +41,7 @@ class PostLifecycle extends React.Component {
 	}
 
 	render() {
-		const { post, postKey, followSource, isSelected, recsStreamKey } = this.props;
+		const { post, postKey, followSource, isSelected, recsStreamKey, streamKey } = this.props;
 
 		if ( postKey.isRecommendationBlock ) {
 			return (
@@ -63,7 +63,7 @@ class PostLifecycle extends React.Component {
 					showFollowButton={ this.props.showPrimaryFollowButtonOnCards }
 				/>
 			);
-		} else if ( postKey.isRecommendation ) {
+		} else if ( streamKey.indexOf( 'rec' ) > -1 ) {
 			return <EmptySearchRecommendedPost post={ post } site={ postKey } />;
 		} else if ( postKey.isGap ) {
 			return (

@@ -40,9 +40,7 @@ function streamKeySuffix( streamKey ) {
 	return streamKey.substring( streamKey.indexOf( ':' ) + 1 );
 }
 
-function getSeedForQuery() {
-	return random( 0, 10000 );
-}
+const PER_PAGE = 6;
 
 export const getQueryString = ( { metaExtras, extras0 } = {} ) => ( extras = {} ) => {
 	const meta = `post,discover_original_post${ !! metaExtras ? ',' + metaExtras : '' }`;
@@ -91,18 +89,23 @@ const streamApis = {
 		query: ( { query } ) => {
 			return {
 				...query,
-				seed: getSeedForQuery(),
+				seed: random( 0, 1000 ),
 				algorithm: 'read:recommendations:posts/es/1',
 			};
 		},
 	},
 	custom_recs_posts_with_images: {
 		path: () => '/read/recommendations/posts',
-		query: ( { query } ) => {
+		query: extras => {
 			return {
-				...query,
-				seed: getSeedForQuery(),
-				algorithm: 'read:recommendations:posts/es/7',
+				...extras,
+				meta: 'post,discover_original_post',
+				content_width: 675,
+				number: PER_PAGE,
+				orderBy: 'date',
+				seed: random( 0, 1000 ),
+				// algorithm: 'read:recommendations:posts/es/7',
+				alg_prefix: 'read:recommendations:posts',
 			};
 		},
 	},
