@@ -120,4 +120,13 @@ export default {
 		defaultVariation: 'control',
 		allowExistingUsers: true,
 	},
+	inlineHelpWithContactForm: {
+		datestamp: '20180306',
+		variations: {
+			original: 90,
+			inlinecontact: 10,
+		},
+		defaultVariation: 'original',
+		allowExistingUsers: true,
+	},
 };
