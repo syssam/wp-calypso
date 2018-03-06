@@ -1,10 +1,15 @@
 /** @format */
 const _ = require( 'lodash' );
+const path = require( 'path' );
 
-const calypsoCheck = new RegExp( [ 'webpack', 'bundle.js', 'happypack' ].join( '|' ) ); // heuristics to determine that indicate the babel file is being run in a Calypso environment.  TODO: Should we be explicit instead?
+// TODO: remove all these trash heuristics in favor of explicit env setting in package.json
+const calypsoCheck = new RegExp( [ 'webpack', 'bundle.js', 'happypack' ].join( '|' ) );
 const isCalypso = _.some( process.argv, cmdArg => calypsoCheck.test( cmdArg ) );
+const isServer = process.env.IS_SERVER === 'true';
 const isTest = process.env.NODE_ENV === 'test';
-const moduleSystem = isCalypso ? false : 'commonjs';
+const moduleSystem = isCalypso && ! isServer ? false : 'commonjs';
+const codeSplit =
+	! isServer && isCalypso && require( './server/config' ).isEnabled( 'code-splitting' );
 
 const config = {
 	presets: [
@@ -22,6 +27,17 @@ const config = {
 	],
 	plugins: _.compact( [
 		! isCalypso && 'add-module-exports',
+		isCalypso && [
+			path.join(
+				__dirname,
+				'server',
+				'bundler',
+				'babel',
+				'babel-plugin-transform-wpcalypso-async'
+			),
+			{ async: ! codeSplit },
+		],
+		// isCalypso && ! isServer && path.join( __dirname, 'inline-imports.js' ),
 		'@babel/plugin-proposal-export-default-from',
 		'@babel/transform-runtime',
 		[
@@ -48,6 +64,7 @@ const config = {
 		},
 	},
 };
+
 console.error( process.argv, isCalypso, isTest, moduleSystem );
 console.error( process.argv, isCalypso, isTest, moduleSystem );
 console.error( JSON.stringify( config, '\t', 2 ) );

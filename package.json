@@ -193,7 +193,7 @@
     "build-devdocs:index:_env": "node server/devdocs/bin/generate-devdocs-index \"**/*.md\" \".github/**.md\" \"!build/**\" \"!node_modules/**\" \"!public/**\"",
     "build-docker": "node bin/build-docker.js",
     "prebuild-server": "mkdirp build",
-    "build-server": "npm run -s env -- webpack --display-error-details --config webpack.config.node.js",
+    "build-server": "IS_SERVER=true npm run -s env -- webpack --display-error-details --config webpack.config.node.js",
     "build-client": "npm run -s env -- node --max_old_space_size=8192 ./node_modules/webpack/bin/webpack.js --display-error-details --config webpack.config.js",
     "build-client-if-prod": "node -e \"process.env.CALYPSO_ENV === 'production' && process.exit(1)\" || npm run build-client",
     "build-client-if-desktop": "node -e \"process.env.CALYPSO_ENV === 'desktop' && process.exit(1)\" || npm run build-client",

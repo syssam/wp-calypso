@@ -70,20 +70,8 @@ function getExternals() {
 const babelLoader = {
 	loader: 'babel-loader',
 	options: {
-		plugins: [
-			[
-				path.join(
-					__dirname,
-					'server',
-					'bundler',
-					'babel',
-					'babel-plugin-transform-wpcalypso-async'
-				),
-				{ async: false },
-			],
-		],
 		cacheDirectory: path.join( __dirname, 'build', '.babel-server-cache' ),
-		cacheIdentifier: cacheIdentifier,
+		cacheIdentifier,
 	},
 };
 

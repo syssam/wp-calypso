@@ -334,6 +334,13 @@
         "@babel/plugin-syntax-class-properties": "7.0.0-beta.40"
       }
     },
+    "@babel/plugin-proposal-export-default-from": {
+      "version": "7.0.0-beta.40",
+      "integrity": "sha512-jmvPxYh5FcnNttTCcPDEvzklOu8FBGDdShKyVWWqPqPYJPmWkCAb0QGU5u3mEQOZwzBW/pHX8/eA4tFSEyHyKQ==",
+      "requires": {
+        "@babel/plugin-syntax-export-default-from": "7.0.0-beta.40"
+      }
+    },
     "@babel/plugin-proposal-export-namespace-from": {
       "version": "7.0.0-beta.40",
       "integrity": "sha512-tzJeDx0ajiT/Ittfnoaurqnb002J1YDIb0wRuhjJ3f1dsIaLrbkt920aKfmA1+pitzSdSE0PDFXNtQw7hIN/lg==",
@@ -396,6 +403,10 @@
     "@babel/plugin-syntax-dynamic-import": {
       "version": "7.0.0-beta.40",
       "integrity": "sha512-YdXgB/tXK42arLlnVwUFX/VZFDPNKdxsDNkT7lIG5GDFmi77D1+e1JVRnVrUSlB4l3+attMsV84vqXGMq0SkIw=="
+    },
+    "@babel/plugin-syntax-export-default-from": {
+      "version": "7.0.0-beta.40",
+      "integrity": "sha512-fcL44B5hXcBAn6HedDPMThB6bnxIUhBGP5aZbuHXqXk0OmWAusL2AuCfvT2/M3BL6rfPifaQl6Lh8oZ0FxwxZw=="
     },
     "@babel/plugin-syntax-export-namespace-from": {
       "version": "7.0.0-beta.40",
@@ -712,6 +723,14 @@
         "@babel/plugin-syntax-import-meta": "7.0.0-beta.40"
       }
     },
+    "@babel/runtime": {
+      "version": "7.0.0-beta.40",
+      "integrity": "sha512-vIM68NUCWauZJTFoVUG1lggva1I8FLB9zFKwWG7Xjin4FkHpEKJv2y4x1DGVPVt93S5/zHSBj1bXYEuxOkFGzg==",
+      "requires": {
+        "core-js": "2.5.3",
+        "regenerator-runtime": "0.11.1"
+      }
+    },
     "@babel/template": {
       "version": "7.0.0-beta.40",
       "integrity": "sha512-RlQiVB7eL7fxsKN6JvnCCwEwEL28CBYalXSgWWULuFlEHjtMoXBqQanSie3bNyhrANJx67sb+Sd/vuGivoMwLQ==",
@@ -819,12 +838,12 @@
       "integrity": "sha512-KjZwU26uG3u6eZcfGbTULzFcsoz6pegNKtHPksZPOUsiKo5bUmiBPa38FuHZ/Eun+XYh/JCCkS9AS3Lu4McQOQ==",
       "dev": true,
       "requires": {
-        "acorn": "5.5.0"
+        "acorn": "5.5.1"
       },
       "dependencies": {
         "acorn": {
-          "version": "5.5.0",
-          "integrity": "sha512-arn53F07VXmls4o4pUhSzBa4fvaagPRe7AVZ8l7NHxFWUie2DsuFSBMMNAkgzRlOhEhzAnxeKyaWVzOH4xqp/g==",
+          "version": "5.5.1",
+          "integrity": "sha512-D/KGiCpM/VOtTMDS+wfjywEth926WUrArrzYov4N4SI7t+3y8747dPpCmmAvrm/Z3ygqMHnyPxvYYO0yTdn/nQ==",
           "dev": true
         }
       }
@@ -1280,27 +1299,15 @@
       }
     },
     "babel-eslint": {
-      "version": "6.1.2",
-      "integrity": "sha1-UpNBn+NnLWZZjTJ9qWlFZ7pqXy8=",
-      "dev": true,
+      "version": "8.2.2",
+      "integrity": "sha512-Qt2lz2egBxNYWqN9JIO2z4NOOf8i4b5JS6CFoYrOZZTDssueiV1jH/jsefyg+86SeNY3rB361/mi3kE1WK2WYQ==",
       "requires": {
-        "babel-traverse": "6.26.0",
-        "babel-types": "6.26.0",
-        "babylon": "6.18.0",
-        "lodash.assign": "4.2.0",
-        "lodash.pickby": "4.6.0"
-      },
-      "dependencies": {
-        "babylon": {
-          "version": "6.18.0",
-          "integrity": "sha512-q/UEjfGJ2Cm3oKV71DJz9d25TPnq5rhBVL2Q4fA5wcC3jcrdn7+SssEybFIxwAvvP+YCsCYNKughoF33GxgycQ==",
-          "dev": true
-        },
-        "lodash.assign": {
-          "version": "4.2.0",
-          "integrity": "sha1-DZnzzNem0mHRm9rrkkUAXShYCOc=",
-          "dev": true
-        }
+        "@babel/code-frame": "7.0.0-beta.40",
+        "@babel/traverse": "7.0.0-beta.40",
+        "@babel/types": "7.0.0-beta.40",
+        "babylon": "7.0.0-beta.40",
+        "eslint-scope": "3.7.1",
+        "eslint-visitor-keys": "1.0.0"
       }
     },
     "babel-generator": {
@@ -1673,7 +1680,6 @@
     "babel-plugin-transform-builtin-extend": {
       "version": "1.1.2",
       "integrity": "sha1-Xpb+z1i4+h7XTvytiEdbKvPJEW4=",
-      "dev": true,
       "requires": {
         "babel-runtime": "6.26.0",
         "babel-template": "6.26.0"
@@ -2575,7 +2581,7 @@
       "version": "3.1.1",
       "integrity": "sha512-zHGaPnTt70ywm+glR7uMJFZSl+ADGO67SgD2ae20L+Y3KJUeH4fVa89OkTqKCqAnXFE9mO4LTHBKBqKRlr7VNw==",
       "requires": {
-        "caniuse-lite": "1.0.30000812",
+        "caniuse-lite": "1.0.30000813",
         "electron-to-chromium": "1.3.36"
       }
     },
@@ -2726,8 +2732,8 @@
       "integrity": "sha1-4KHGA/iICteHsqNWUrJzPzKl4po="
     },
     "caniuse-lite": {
-      "version": "1.0.30000812",
-      "integrity": "sha512-j+l55ayQ9BO4Sy9iVfbf99+G+4ddAmkXoiEt73WCW4vJ83usrlHzDkFEnNXe5/swkVqE7YBm5i8M2uRXlx9vWg=="
+      "version": "1.0.30000813",
+      "integrity": "sha512-A8ITSmH5SFdMFdC704ggjg+x2z5PzQmVlG8tavwnfvbC33Q1UYrj0+G+Xm0SNAnd4He36fwUE/KEWytOEchw+A=="
     },
     "cardinal": {
       "version": "1.0.0",
@@ -4113,13 +4119,13 @@
       "integrity": "sha512-H6PmeeUcZloWtdt4DAkFyzFL94arpHr3NOwwmVILFiy+9Qd4JTxxXrzfyGk/lmct2qVGBwTSwSXagqu2BxmWig==",
       "dev": true,
       "requires": {
-        "acorn": "5.5.0",
+        "acorn": "5.5.1",
         "defined": "1.0.0"
       },
       "dependencies": {
         "acorn": {
-          "version": "5.5.0",
-          "integrity": "sha512-arn53F07VXmls4o4pUhSzBa4fvaagPRe7AVZ8l7NHxFWUie2DsuFSBMMNAkgzRlOhEhzAnxeKyaWVzOH4xqp/g==",
+          "version": "5.5.1",
+          "integrity": "sha512-D/KGiCpM/VOtTMDS+wfjywEth926WUrArrzYov4N4SI7t+3y8747dPpCmmAvrm/Z3ygqMHnyPxvYYO0yTdn/nQ==",
           "dev": true
         }
       }
@@ -5140,6 +5146,18 @@
         "requireindex": "1.2.0"
       }
     },
+    "eslint-scope": {
+      "version": "3.7.1",
+      "integrity": "sha1-PWPD7f2gLgbgGkUq2IyqzHzctug=",
+      "requires": {
+        "esrecurse": "4.2.1",
+        "estraverse": "4.2.0"
+      }
+    },
+    "eslint-visitor-keys": {
+      "version": "1.0.0",
+      "integrity": "sha512-qzm/XxIbxm/FHyH341ZrbnMUpe+5Bocte9xkmFMzPMjRaZMcXww+MpBptFvtU+79L362nqiLhekCxCxDPaUMBQ=="
+    },
     "esmangle-evaluator": {
       "version": "1.0.1",
       "integrity": "sha1-Yg2GbvSGGzMR91dm1SqFcrs8YzY="
@@ -5149,13 +5167,13 @@
       "integrity": "sha512-yAcIQxtmMiB/jL32dzEp2enBeidsB7xWPLNiw3IIkpVds1P+h7qF9YwJq1yUNzp2OKXgAprs4F61ih66UsoD1A==",
       "dev": true,
       "requires": {
-        "acorn": "5.5.0",
+        "acorn": "5.5.1",
         "acorn-jsx": "3.0.1"
       },
       "dependencies": {
         "acorn": {
-          "version": "5.5.0",
-          "integrity": "sha512-arn53F07VXmls4o4pUhSzBa4fvaagPRe7AVZ8l7NHxFWUie2DsuFSBMMNAkgzRlOhEhzAnxeKyaWVzOH4xqp/g==",
+          "version": "5.5.1",
+          "integrity": "sha512-D/KGiCpM/VOtTMDS+wfjywEth926WUrArrzYov4N4SI7t+3y8747dPpCmmAvrm/Z3ygqMHnyPxvYYO0yTdn/nQ==",
           "dev": true
         }
       }
@@ -9293,7 +9311,7 @@
       "dev": true,
       "requires": {
         "abab": "1.0.4",
-        "acorn": "5.5.0",
+        "acorn": "5.5.1",
         "acorn-globals": "4.1.0",
         "array-equal": "1.0.0",
         "browser-process-hrtime": "0.1.2",
@@ -9321,8 +9339,8 @@
       },
       "dependencies": {
         "acorn": {
-          "version": "5.5.0",
-          "integrity": "sha512-arn53F07VXmls4o4pUhSzBa4fvaagPRe7AVZ8l7NHxFWUie2DsuFSBMMNAkgzRlOhEhzAnxeKyaWVzOH4xqp/g==",
+          "version": "5.5.1",
+          "integrity": "sha512-D/KGiCpM/VOtTMDS+wfjywEth926WUrArrzYov4N4SI7t+3y8747dPpCmmAvrm/Z3ygqMHnyPxvYYO0yTdn/nQ==",
           "dev": true
         },
         "parse5": {
@@ -11908,7 +11926,7 @@
       "integrity": "sha1-gV7R9uvGWSb4ZbMQwHE7yzMVzks="
     },
     "prettier": {
-      "version": "github:automattic/calypso-prettier#503d7779e8e95f0ea0d6dc55056db41c16835cb1",
+      "version": "github:Automattic/calypso-prettier#c56b42511ec98ba6d8f72b6c391e0a626e90f531",
       "dev": true,
       "requires": {
         "babel-code-frame": "7.0.0-beta.3",
@@ -12444,6 +12462,18 @@
           "integrity": "sha1-tDLdM1i2NM914eRmQ2gkBTPB3b4=",
           "dev": true
         },
+        "babel-eslint": {
+          "version": "6.1.2",
+          "integrity": "sha1-UpNBn+NnLWZZjTJ9qWlFZ7pqXy8=",
+          "dev": true,
+          "requires": {
+            "babel-traverse": "6.26.0",
+            "babel-types": "6.26.0",
+            "babylon": "6.18.0",
+            "lodash.assign": "4.2.0",
+            "lodash.pickby": "4.6.0"
+          }
+        },
         "babel-jest": {
           "version": "15.0.0",
           "integrity": "sha1-ap4uOZnyQTg9uaseLvZwRAHXQkI=",
@@ -12477,6 +12507,11 @@
           "requires": {
             "babel-plugin-jest-hoist": "15.0.0"
           }
+        },
+        "babylon": {
+          "version": "6.18.0",
+          "integrity": "sha512-q/UEjfGJ2Cm3oKV71DJz9d25TPnq5rhBVL2Q4fA5wcC3jcrdn7+SssEybFIxwAvvP+YCsCYNKughoF33GxgycQ==",
+          "dev": true
         },
         "bser": {
           "version": "1.0.2",
@@ -12874,6 +12909,11 @@
             "whatwg-url": "4.8.0",
             "xml-name-validator": "2.0.1"
           }
+        },
+        "lodash.assign": {
+          "version": "4.2.0",
+          "integrity": "sha1-DZnzzNem0mHRm9rrkkUAXShYCOc=",
+          "dev": true
         },
         "lodash.clonedeep": {
           "version": "3.0.2",
@@ -16539,7 +16579,7 @@
       "version": "3.10.0",
       "integrity": "sha512-fxxKXoicjdXNUMY7LIdY89tkJJJ0m1Oo8PQutZ5rLgWbV5QVKI15Cn7+/IHnRTd3vfKfiwBx6SBqlorAuNA8LA==",
       "requires": {
-        "acorn": "5.5.0",
+        "acorn": "5.5.1",
         "acorn-dynamic-import": "2.0.2",
         "ajv": "5.5.2",
         "ajv-keywords": "2.1.1",
@@ -16564,8 +16604,8 @@
       },
       "dependencies": {
         "acorn": {
-          "version": "5.5.0",
-          "integrity": "sha512-arn53F07VXmls4o4pUhSzBa4fvaagPRe7AVZ8l7NHxFWUie2DsuFSBMMNAkgzRlOhEhzAnxeKyaWVzOH4xqp/g=="
+          "version": "5.5.1",
+          "integrity": "sha512-D/KGiCpM/VOtTMDS+wfjywEth926WUrArrzYov4N4SI7t+3y8747dPpCmmAvrm/Z3ygqMHnyPxvYYO0yTdn/nQ=="
         },
         "ajv-keywords": {
           "version": "2.1.1",
@@ -16786,7 +16826,7 @@
       "integrity": "sha1-Y+2G63HMTNqG9o5oWoRTC6ASZEk=",
       "dev": true,
       "requires": {
-        "acorn": "5.5.0",
+        "acorn": "5.5.1",
         "chalk": "1.1.3",
         "commander": "2.14.1",
         "ejs": "2.5.7",
@@ -16809,8 +16849,8 @@
           }
         },
         "acorn": {
-          "version": "5.5.0",
-          "integrity": "sha512-arn53F07VXmls4o4pUhSzBa4fvaagPRe7AVZ8l7NHxFWUie2DsuFSBMMNAkgzRlOhEhzAnxeKyaWVzOH4xqp/g==",
+          "version": "5.5.1",
+          "integrity": "sha512-D/KGiCpM/VOtTMDS+wfjywEth926WUrArrzYov4N4SI7t+3y8747dPpCmmAvrm/Z3ygqMHnyPxvYYO0yTdn/nQ==",
           "dev": true
         },
         "ansi-styles": {

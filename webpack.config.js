@@ -65,19 +65,6 @@ const babelLoader = {
 	options: {
 		cacheDirectory: path.join( __dirname, 'build', '.babel-client-cache' ),
 		cacheIdentifier,
-		plugins: [
-			[
-				path.join(
-					__dirname,
-					'server',
-					'bundler',
-					'babel',
-					'babel-plugin-transform-wpcalypso-async'
-				),
-				{ async: config.isEnabled( 'code-splitting' ) },
-			],
-			'inline-imports.js',
-		],
 	},
 };
 
