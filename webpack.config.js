@@ -105,6 +105,12 @@ const webpackConfig = {
 		chunkFilename: '[name].[chunkhash].min.js', // ditto
 		devtoolModuleFilenameTemplate: 'app:///[resource-path]',
 	},
+	optimization: {
+		splitChunks: {
+			chunks: 'all',
+		},
+		runtimeChunk: true,
+	},
 	module: {
 		// avoids this warning:
 		// https://github.com/localForage/localForage/issues/577
