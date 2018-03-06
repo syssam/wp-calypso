@@ -2,21 +2,20 @@
 const _ = require( 'lodash' );
 const path = require( 'path' );
 
-// TODO: remove all these trash heuristics in favor of explicit env setting in package.json
-const calypsoCheck = new RegExp( [ 'webpack', 'bundle.js', 'happypack' ].join( '|' ) );
-const isCalypso = _.some( process.argv, cmdArg => calypsoCheck.test( cmdArg ) );
-const isServer = process.env.IS_SERVER === 'true';
+const isCalypsoClient = process.env.CALYPSO_CLIENT === 'true';
+const isCalypsoServer = process.env.CALYPSO_SERVER === 'true';
+const isCalypso = isCalypsoClient || isCalypsoServer;
 const isTest = process.env.NODE_ENV === 'test';
-const moduleSystem = isCalypso && ! isServer ? false : 'commonjs';
-const codeSplit =
-	! isServer && isCalypso && require( './server/config' ).isEnabled( 'code-splitting' );
+
+const modules = isCalypsoClient ? false : 'commonjs'; // only calypso should keep es6 modules
+const codeSplit = require( './server/config' ).isEnabled( 'code-splitting' );
 
 const config = {
 	presets: [
 		[
 			'@babel/env',
 			{
-				modules: moduleSystem,
+				modules,
 				targets: {
 					browsers: [ 'last 2 versions', 'Safari >= 10', 'iOS >= 10', 'not ie <= 10' ],
 				},
@@ -35,9 +34,9 @@ const config = {
 				'babel',
 				'babel-plugin-transform-wpcalypso-async'
 			),
-			{ async: ! codeSplit },
+			{ async: isCalypsoClient && codeSplit },
 		],
-		// isCalypso && ! isServer && path.join( __dirname, 'inline-imports.js' ),
+		// TODO: maybe make this work: isCalypso && ! isServer && './inline-imports.js',
 		'@babel/plugin-proposal-export-default-from',
 		'@babel/transform-runtime',
 		[
@@ -64,9 +63,5 @@ const config = {
 		},
 	},
 };
-
-console.error( process.argv, isCalypso, isTest, moduleSystem );
-console.error( process.argv, isCalypso, isTest, moduleSystem );
-console.error( JSON.stringify( config, '\t', 2 ) );
 
 module.exports = config;
