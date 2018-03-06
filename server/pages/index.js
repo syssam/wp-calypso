@@ -87,10 +87,10 @@ const getAssets = ( () => {
  **/
 function generateStaticUrls() {
 	const urls = { ...staticFilesUrls };
-	const assets = getAssets();
+	const assets = getAssets().assetsByChunkName;
 
 	forEach( assets, ( asset, name ) => {
-		urls[ name ] = asset.js;
+		urls[ name ] = asset;
 	} );
 
 	return urls;
@@ -183,7 +183,10 @@ function getDefaultContext( request ) {
 		isDebug,
 		badge: false,
 		lang: config( 'i18n_default_locale_slug' ),
-		jsFile: 'build',
+		entrypoint: getAssets().entrypoints.build.assets.filter(
+			asset => ! asset.startsWith( 'manifest' )
+		),
+		manifest: getAssets().manifests.manifest,
 		faviconURL: '//s1.wp.com/i/favicon.ico',
 		isFluidWidth: !! config.isEnabled( 'fluid-width' ),
 		abTestHelper: !! config.isEnabled( 'dev/test-helper' ),
@@ -536,7 +539,7 @@ module.exports = function() {
 					req.context = Object.assign( {}, req.context, { sectionName: section.name } );
 
 					if ( config.isEnabled( 'code-splitting' ) ) {
-						req.context.chunk = section.name;
+						req.context.chunk = getAssets().assetsByChunkName[ section.name ];
 					}
 
 					if ( section.secondary && req.context ) {

@@ -92,14 +92,14 @@ function middleware( app ) {
 				hash: true,
 				version: false,
 				timings: true,
-				assets: false,
-				chunks: true,
-				chunkModules: false,
+				assets: true,
+				chunks: false,
 				modules: false,
 				cached: false,
 				reasons: false,
 				source: false,
 				errorDetails: true,
+				entrypoints: true,
 			},
 		} )
 	);

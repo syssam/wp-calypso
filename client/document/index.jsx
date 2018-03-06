@@ -29,7 +29,8 @@ class Document extends React.Component {
 			i18nLocaleScript,
 			initialReduxState,
 			isRTL,
-			jsFile,
+			entrypoint,
+			manifest,
 			lang,
 			renderedLayout,
 			user,
@@ -162,10 +163,13 @@ class Document extends React.Component {
 					/>
 
 					{ i18nLocaleScript && <script src={ i18nLocaleScript } /> }
-					<script src={ urls.manifest } />
-					<script src={ urls.vendor } />
-					<script src={ urls[ jsFile ] } />
-					{ chunk && <script src={ urls[ chunk ] } /> }
+					<script
+						dangerouslySetInnerHTML={ {
+							__html: manifest,
+						} }
+					/>
+					{ entrypoint.map( asset => <script src={ asset } /> ) }
+					{ chunk && <script src={ chunk } /> }
 					<script type="text/javascript">window.AppBoot();</script>
 					<script
 						dangerouslySetInnerHTML={ {

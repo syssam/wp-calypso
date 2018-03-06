@@ -23,6 +23,8 @@ const bundleEnv = config( 'env' );
 /**
  * Internal variables
  */
+const isDevelopment = bundleEnv === 'development';
+
 const commitSha = process.env.hasOwnProperty( 'COMMIT_SHA' ) ? process.env.COMMIT_SHA : '(unknown)';
 
 // disable add-module-exports. TODO: remove add-module-exports from babelrc. requires fixing jest tests
@@ -105,6 +107,7 @@ const webpackConfig = {
 		path: path.join( __dirname, 'build' ),
 		filename: 'bundle.js',
 	},
+	mode: isDevelopment ? 'development' : 'production',
 	module: {
 		rules: [
 			{

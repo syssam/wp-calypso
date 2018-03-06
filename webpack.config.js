@@ -14,7 +14,7 @@ const HardSourceWebpackPlugin = require( 'hard-source-webpack-plugin' );
 const path = require( 'path' );
 const webpack = require( 'webpack' );
 const NameAllModulesPlugin = require( 'name-all-modules-plugin' );
-const AssetsPlugin = require( 'assets-webpack-plugin' );
+const AssetsPlugin = require( './server/bundler/assets-writer' );
 const prism = require( 'prismjs' );
 
 /**
@@ -108,8 +108,12 @@ const webpackConfig = {
 	optimization: {
 		splitChunks: {
 			chunks: 'all',
+			name: isDevelopment,
 		},
-		runtimeChunk: true,
+		runtimeChunk: { name: 'manifest' },
+		namedModules: true,
+		namedChunks: true,
+		minimize: shouldMinify,
 	},
 	module: {
 		// avoids this warning:
@@ -198,13 +202,6 @@ const webpackConfig = {
 		new CopyWebpackPlugin( [
 			{ from: 'node_modules/flag-icon-css/flags/4x3', to: 'images/flags' },
 		] ),
-		new webpack.NamedChunksPlugin( chunk => {
-			if ( chunk.name ) {
-				return chunk.name;
-			}
-
-			return chunk.modules.map( m => path.relative( m.context, m.request ) ).join( '_' );
-		} ),
 		new NameAllModulesPlugin(),
 		new AssetsPlugin( {
 			filename: 'assets.json',
