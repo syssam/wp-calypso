@@ -3,12 +3,16 @@
 /**
  * External dependencies
  */
+const fs = require( 'fs' ); // eslint-disable-line
 const path = require( 'path' );
 
 /**
  * Internal dependencies
  */
-const babelConfig = require( path.resolve( __dirname, '../../../../.babelrc.js' ) );
+const babelConfigFile = fs.readFileSync(
+	path.resolve( __dirname, '../../../../.babelrc.js' ),
+	'utf-8'
+);
 
 /**
  * Given a module name, returns the package version
@@ -35,6 +39,6 @@ module.exports = JSON.stringify( {
 	'babel-plugin-transform-wpcalypso-async': getModuleVersion(
 		'../babel-plugin-transform-wpcalypso-async'
 	),
-	babelrc: babelConfig,
+	babelrc: babelConfigFile,
 	env: process.env.BABEL_ENV || process.env.NODE_ENV,
 } );
