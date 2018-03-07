@@ -36,7 +36,8 @@ const config = {
 			),
 			{ async: isCalypsoClient && codeSplit },
 		],
-		// TODO: maybe make this work: isCalypso && ! isServer && './inline-imports.js',
+		// @todo: re-evaluate inline-imports.js
+		// isCalypsoClient && './inline-imports.js',
 		'@babel/plugin-proposal-export-default-from',
 		'@babel/transform-runtime',
 		[
