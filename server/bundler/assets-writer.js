@@ -46,7 +46,7 @@ Object.assign( AssetsWriter.prototype, {
 
 			for ( const name in stats.assetsByChunkName ) {
 				// make the manifest inlineable
-				if ( name.startsWith( 'manifest' ) ) {
+				if ( String( name ).startsWith( 'manifest' ) ) {
 					statsToOutput.manifests[ name ] = compilation.assets[
 						stats.assetsByChunkName[ name ]
 					].source();
@@ -54,12 +54,13 @@ Object.assign( AssetsWriter.prototype, {
 			}
 
 			statsToOutput.entrypoints = stats.entrypoints;
+			console.log( JSON.stringify( statsToOutput, null, 2 ) );
 			for ( const entrypoint in statsToOutput.entrypoints ) {
 				// remove the manifest
 				statsToOutput.entrypoints[ entrypoint ].chunks = statsToOutput.entrypoints[
 					entrypoint
 				].chunks.filter( function( p ) {
-					return ! p.startsWith( 'manifest' );
+					return ! String( p ).startsWith( 'manifest' );
 				} );
 				statsToOutput.entrypoints[ entrypoint ].assets = statsToOutput.entrypoints[
 					entrypoint
