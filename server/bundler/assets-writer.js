@@ -55,6 +55,10 @@ Object.assign( AssetsWriter.prototype, {
 
 			statsToOutput.entrypoints = stats.entrypoints;
 
+			function fixupPath( f ) {
+				return path.join( stats.publicPath, f );
+			}
+
 			for ( const entrypoint in statsToOutput.entrypoints ) {
 				// remove the manifest
 				statsToOutput.entrypoints[ entrypoint ].chunks = statsToOutput.entrypoints[
@@ -68,23 +72,22 @@ Object.assign( AssetsWriter.prototype, {
 					.filter( function( p ) {
 						return ! p.startsWith( 'manifest' );
 					} )
-					.map( function( p ) {
-						return path.join( stats.publicPath, p );
-					} );
+					.map( fixupPath );
 			}
 			statsToOutput.assetsByChunkName = stats.assetsByChunkName;
 
 			for ( const chunkname in statsToOutput.assetsByChunkName ) {
-				statsToOutput.assetsByChunkName[ chunkname ] = path.join(
-					statsToOutput.publicPath,
-					statsToOutput.assetsByChunkName[ chunkname ]
-				);
+				const files = statsToOutput.assetsByChunkName[ chunkname ];
+
+				if ( Array.isArray( files ) ) {
+					statsToOutput.assetsByChunkName[ chunkname ] = files.map( fixupPath );
+				} else {
+					statsToOutput.assetsByChunkName[ chunkname ] = fixupPath( files );
+				}
 			}
 			statsToOutput.chunks = stats.chunks.map( function( chunk ) {
 				return Object.assign( {}, chunk, {
-					files: chunk.files.map( function( file ) {
-						return path.join( stats.publicPath, file );
-					} ),
+					files: chunk.files.map( fixupPath ),
 				} );
 			} );
 
