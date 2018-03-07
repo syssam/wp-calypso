@@ -13,7 +13,7 @@ const codeSplit = require( './server/config' ).isEnabled( 'code-splitting' );
 const config = {
 	presets: [
 		[
-			'@babel/env',
+			'@babel/preset-env',
 			{
 				modules,
 				targets: {
