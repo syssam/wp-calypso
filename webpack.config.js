@@ -29,9 +29,7 @@ const config = require( './server/config' );
 const calypsoEnv = config( 'env_id' );
 const bundleEnv = config( 'env' );
 const isDevelopment = bundleEnv === 'development';
-const shouldMinify = process.env.hasOwnProperty( 'MINIFY_JS' )
-	? process.env.MINIFY_JS === 'true'
-	: ! isDevelopment;
+const shouldMinify = process.env.MINIFY_JS === 'true' || bundleEnv === 'production';
 
 // load in the babel config from babelrc and disable commonjs transform
 // this enables static analysis from webpack including treeshaking
