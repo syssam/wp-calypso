@@ -54,7 +54,7 @@ Object.assign( AssetsWriter.prototype, {
 			}
 
 			statsToOutput.entrypoints = stats.entrypoints;
-			console.log( JSON.stringify( statsToOutput, null, 2 ) );
+
 			for ( const entrypoint in statsToOutput.entrypoints ) {
 				// remove the manifest
 				statsToOutput.entrypoints[ entrypoint ].chunks = statsToOutput.entrypoints[
