@@ -16,7 +16,6 @@ import DocumentHead from 'components/data/document-head';
 import { sectionify } from 'lib/route';
 import Main from 'components/main';
 import { addItem } from 'lib/upgrades/actions';
-import productsFactory from 'lib/products-list';
 import { canCurrentUser } from 'state/selectors';
 import { getSelectedSiteId, getSelectedSite, getSelectedSiteSlug } from 'state/ui/selectors';
 import { getCurrentUser } from 'state/current-user/selectors';
@@ -28,11 +27,6 @@ import TransferDomain from 'my-sites/domains/transfer-domain';
 import TransferDomainStep from 'components/domains/transfer-domain-step';
 import GoogleApps from 'components/upgrades/google-apps';
 import { domainManagementTransferIn } from 'my-sites/domains/paths';
-
-/**
- * Module variables
- */
-const productsList = productsFactory();
 
 const domainsAddHeader = ( context, next ) => {
 	context.getSiteSelectionHeaderText = () => {
@@ -182,7 +176,6 @@ const googleAppsWithRegistration = ( context, next ) => {
 			/>
 			<CartData>
 				<GoogleApps
-					productsList={ productsList }
 					domain={ context.params.registerDomain }
 					onGoBack={ handleGoBack }
 					onAddGoogleApps={ handleAddGoogleApps }
