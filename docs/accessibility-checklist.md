@@ -4,9 +4,10 @@ This document aims to provide a quick testing workflow that will help you find a
 
 For more background and resources, see [Accessibility](accessibility.md).
 
-## Automated Testing
+## Testing Tools
 
 * Do all `js-a11y` linting rules pass?
+* Give it a once-over using the [aXe browser extension](https://www.deque.com/products/axe/) to spot any obvious issues.
 
 ## General Readability
 
@@ -34,5 +35,4 @@ Try navigating the page using only your keyboard.
 * Do any visually-hidden elements have `aria-hidden` tags to hide them from screen readers?
 * Do all links have descriptive text (saying where they go as opposed to something like "click here")?
 * Do any modals or error messages provide useful feedback (via `aria-live` or similar tags)?
-* Give it a once-over using the [aXe browser extension](https://www.deque.com/products/axe/) to spot any obvious issues.
 * If on a Mac, enable [VoiceOver](https://help.apple.com/voiceover/info/guide/10.12/) and try navigating the page.
