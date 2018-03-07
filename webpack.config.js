@@ -107,6 +107,13 @@ const webpackConfig = {
 		splitChunks: {
 			chunks: 'all',
 			name: isDevelopment,
+			cacheGroups: {
+				tinymce: {
+					test: /[\\/]node_modules[\\/]tinymce[\\/]/,
+					priority: 10,
+					name: 'tinymce',
+				},
+			},
 		},
 		runtimeChunk: { name: 'manifest' },
 		namedModules: true,
