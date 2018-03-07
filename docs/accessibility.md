@@ -40,10 +40,8 @@ A collection of resources that will introduce you to the concept of accessibilit
 
 * [WebAIM](http://webaim.org/): WebAIM has provided comprehensive web accessibility solutions since 1999, and is one of the leading providers of web accessibility expertise internationally. WebAIM is a non-profit organization within the [Center for Persons with Disabilities](http://www.cpd.usu.edu/) at [Utah State University](http://www.usu.edu/). The site brings together a huge collection of information about web accessibility. Most of it is up to date and evergreen enough to help you. The [organization's blog](http://webaim.org/blog/) tackles many modern-day, evolving topics related to web accessibility.
 * [W3C’s Web Accessibility Initiative](http://www.w3.org/WAI/): The World Wide Web Consortium's Web Accessibility Initiative provides strategies, guidelines and resources to make the Web accessible to people with disabilities.
-* [A11y Buzz](http://www.a11ybuzz.com/): Several web folks in the accessibility community launched this site in January 2012. It's a collection of accessibility resources that are triaged and reviewed by experts before they're posted.
 * [The Six Simplest Accessibility Tests Anyone Can Do](http://www.karlgroves.com/2013/09/05/the-6-simplest-web-accessibility-tests-anyone-can-do/): A handful of simple things you can do to think about and implement accessibility with little effort as you work on projects.
 * [Why Keyboard Accessibility Isn’t the Same Thing as Screen Reader Accessibility](https://www.ssbbartgroup.com/blog/why-keyboard-accessibility-isnt-the-same-thing-as-screen-reader-accessibility/): This blog post explains the three critical aspects of accessibility for interactive web technologies: Keyboard Accessibility, Screen Reader Accessibility and Cognitive Accessibility, and the differences between each.
-* [Teaching Accessibility Core Rules](http://www.deque.com/pragmatica11y-teaching-accessibility-core-rules): This post breaks down accessibility principles to their core, making them even easier to think about during projects.
 * Presentation: [Explorations in the Virtual DOM: How React.js Impacts Accessibility](https://marcysutton.github.io/react-a11y-presentation/)
 * [Inclusive Design Fundamentals](https://isner.github.io/inclusive-design-fundamentals/), especially the [disability types](https://isner.github.io/inclusive-design-fundamentals/handouts/disability-types.html) to learn about how different disabilities affect how people use technology.
 
@@ -54,8 +52,6 @@ A set of blogs, written by accessibility consultants and evangelists that go in 
 * [The Paciello Group Blog](http://www.paciellogroup.com/blog/): A blog about web accessibility by one of the first accessibility consulting firms.
 * [Simply Accessible](http://simplyaccessible.com/): A blog with in-depth web accessibility tutorials.
 * [WebAxe](http://www.webaxe.org/): A blog and podcast about web accessibility.
-* [456 Berea Street](http://www.456bereastreet.com/): A blog on accessibility and web development by Roger Johansson.
-* [Accessible Culture](http://www.accessibleculture.org/): A blog about web accessibility by Jason Kiss, an accessibility and standards researcher located in Wellington, New Zealand.
 
 ## Tools
 
@@ -79,7 +75,6 @@ Find tools that will help you bring accessibility into your workflow.
 * [VoiceOver for iOS](http://www.apple.com/accessibility/iphone/vision.html): Built-in screenreader for iOS.
 * [Chrome Vox](http://www.chromevox.com/): A screenreader for ChromeOS.
 * [WCAG 2.0 Cheat Sheet](http://www.w3.org/2009/cheatsheet/#wcag2) A simplified look at WCAG 2.0.
-* [WCAG 2.0 Mind Map](http://stamfordinteractive.com.au/wp-content/uploads/2013/03/WCAG20Map.pdf): A clickable mind-map that helps put the web accessibility guidelines into perspective. This WCAG 2.0-on-a-single-page reference is an alternative way to view the guidelines.
 * [An Alt Text Decision Tree](http://dev.w3.org/html5/alt-techniques/developer.html#tree): A decision tree for deciding when and how to implement alt text in your work on the web. This is a work in progress by the editors of the HTML5 spec, but it's extremely useful in its current form.
 
 ## Utilities in Calypso
