@@ -10,14 +10,12 @@ GoogleApps is a React component used to add Google Apps email addresses to domai
 
 import React from 'react';
 import GoogleApps from 'components/google-apps';
-import productsListFactory from 'lib/products-list';
 
 const productsList = productsListFactory();
 
 class MyComponent extends React.Component {
 	render() {
 		return <GoogleApps
-			productsList={ productsList }
 			domain={ domain }
 			onGoBack={ handleGoBack }
 			onAddGoogleApps={ handleAddGoogleApps }

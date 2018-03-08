@@ -14,7 +14,6 @@ import analytics from 'lib/analytics';
 import { sectionifyWithRoutes } from 'lib/route';
 import { setDocumentHeadTitle as setTitle } from 'state/document-head/actions';
 import { setSection } from 'state/ui/actions';
-import productsFactory from 'lib/products-list';
 import { getSiteBySlug } from 'state/sites/selectors';
 import { getSelectedSite } from 'state/ui/selectors';
 import GsuiteNudge from 'my-sites/checkout/gsuite-nudge';
@@ -23,11 +22,6 @@ import CheckoutData from 'components/data/checkout';
 import CartData from 'components/data/cart';
 import SecondaryCart from './cart/secondary-cart';
 import CheckoutThankYouComponent from './checkout-thank-you';
-
-/**
- * Module variables
- */
-const productsList = productsFactory();
 
 const checkoutRoutes = [
 	new Route( '/checkout/thank-you' ),
@@ -59,7 +53,6 @@ export default {
 			<CheckoutData>
 				<Checkout
 					product={ product }
-					productsList={ productsList }
 					purchaseId={ context.params.purchaseId }
 					selectedFeature={ selectedFeature }
 					couponCode={ context.query.code }
@@ -83,7 +76,7 @@ export default {
 
 		context.primary = (
 			<CheckoutData>
-				<Checkout reduxStore={ context.store } productsList={ productsList } />
+				<Checkout reduxStore={ context.store } />
 			</CheckoutData>
 		);
 
@@ -112,7 +105,6 @@ export default {
 
 		context.primary = (
 			<CheckoutThankYouComponent
-				productsList={ productsList }
 				receiptId={ receiptId }
 				gsuiteReceiptId={ gsuiteReceiptId }
 				domainOnlySiteFlow={ isEmpty( context.params.site ) }
@@ -143,7 +135,6 @@ export default {
 			<CartData>
 				<GsuiteNudge
 					domain={ domain }
-					productsList={ productsList }
 					receiptId={ Number( receiptId ) }
 					selectedSiteId={ selectedSite.ID }
 				/>
