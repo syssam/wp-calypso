@@ -6,7 +6,7 @@ For more background and resources, see [Accessibility](accessibility.md).
 
 ## Testing Tools
 
-* Do all `js-a11y` linting rules pass?
+* Do all `jsx-a11y` linting rules pass?
 * Give it a once-over using the [aXe browser extension](https://www.deque.com/products/axe/) to spot any obvious issues.
 
 ## General Readability
