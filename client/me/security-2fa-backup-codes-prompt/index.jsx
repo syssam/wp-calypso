@@ -3,24 +3,23 @@
 /**
  * External dependencies
  */
-
 import PropTypes from 'prop-types';
 import { localize } from 'i18n-calypso';
 import React from 'react';
 import debugFactory from 'debug';
+
 const debug = debugFactory( 'calypso:me:security:2fa-backup-codes-prompt' );
 
 /**
  * Internal dependencies
  */
+import analytics from 'lib/analytics';
 import FormButton from 'components/forms/form-button';
 import FormFieldset from 'components/forms/form-fieldset';
 import FormLabel from 'components/forms/form-label';
-import FormTelInput from 'components/forms/form-tel-input';
-import twoStepAuthorization from 'lib/two-step-authorization';
-import analytics from 'lib/analytics';
-import constants from 'me/constants';
+import FormVerificationCodeInput from 'components/forms/form-verification-code-input';
 import Notice from 'components/notice';
+import twoStepAuthorization from 'lib/two-step-authorization';
 
 class Security2faBackupCodesPrompt extends React.Component {
 	static displayName = 'Security2faBackupCodesPrompt';
@@ -43,18 +42,6 @@ class Security2faBackupCodesPrompt extends React.Component {
 	componentWillUnmount() {
 		debug( this.constructor.displayName + ' React component will unmount.' );
 	}
-
-	getSubmitDisabled = () => {
-		if ( this.state.submittingCode ) {
-			return true;
-		}
-
-		if ( this.state.backupCodeEntry.length !== 8 ) {
-			return true;
-		}
-
-		return false;
-	};
 
 	onVerify = event => {
 		event.preventDefault();
@@ -136,12 +123,11 @@ class Security2faBackupCodesPrompt extends React.Component {
 					<FormLabel htmlFor="backup-code-entry">
 						{ this.props.translate( 'Type a Backup Code to Verify' ) }
 					</FormLabel>
-					<FormTelInput
+
+					<FormVerificationCodeInput
 						disabled={ this.state.submittingCode }
 						name="backupCodeEntry"
-						autoComplete="off"
-						maxLength="8"
-						placeholder={ constants.eightDigitBackupCodePlaceholder }
+						method="backup"
 						onFocus={ function() {
 							analytics.ga.recordEvent(
 								'Me',
@@ -159,7 +145,7 @@ class Security2faBackupCodesPrompt extends React.Component {
 
 				<FormButton
 					className="security-2fa-backup-codes-prompt__verify"
-					disabled={ this.getSubmitDisabled() }
+					disabled={ this.state.submittingCode }
 					onClick={ function() {
 						analytics.ga.recordEvent( 'Me', 'Clicked On 2fa Backup Codes Verify Button' );
 					} }
