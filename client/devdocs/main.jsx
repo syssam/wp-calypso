@@ -175,7 +175,7 @@ export default class Devdocs extends React.Component {
 
 	render() {
 		return (
-			<Main className="devdocs">
+			<Main className="devdocs devdocs__search">
 				<DocumentHead title="Calypso Docs" />
 
 				<SearchCard
