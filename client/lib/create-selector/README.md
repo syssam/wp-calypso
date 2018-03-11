@@ -7,11 +7,11 @@ This module exports a single function which creates a memoized state selector fo
 
 `createSelector` accepts the following arguments:
 
-- A function which calculates the cached result given a state object and any number of variable arguments necessary to calculate the result
-- A function or array of functions which return array of dependent state, given the state and the same arguments as the selector
+- A function which selects data from the state. Given a state object and any number of other arguments it calculates a result, which is cached for later reuse.
+- A function which returns the part or parts of the state tree the selector depends on. This can be a single value or an array.
 - _(Optional)_ A function to customize the cache key used by the inner memoized function
 
-For example, we might consider that our state contains post objects, each of which are assigned to a particular site. Retrieving an array of posts for a specific site would require us to filter over all of the known posts. While this would normally be an expensive operation, we can use `createSelector` to create a memoized function:
+For example, our state contains post objects, each of which is assigned to a particular site. To retrieve an array of posts for a specific site, we'd have to filter over all of the known posts. While this would normally be an expensive operation, we can use `createSelector` to create a memoized function:
 
 ```js
 export const getSitePosts = createSelector(
@@ -20,7 +20,7 @@ export const getSitePosts = createSelector(
 );
 ```
 
-In using the selector, we only need to consider the signature of the first function argument. In this case, we'll need to pass a state object and site ID.
+To use the selector created with `createSelector`, we only need to consider the signature of the function we passed as the first argument. In this case, we'll need to pass a state object and site ID.
 
 ```js
 const sitePosts = getSitePosts( state, siteId );
@@ -63,7 +63,7 @@ createSelector(
 );
 ```
 
-Since this is a reoccurring pattern, there is a shorthand for this situation. You can reduce the above to an array just the selectors:
+Since this is a recurring pattern, there is a shorthand for this situation. You can reduce the above to an array just the selectors:
 
 ```js
 createSelector(
